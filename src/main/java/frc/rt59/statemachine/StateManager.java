@@ -3,7 +3,7 @@ package frc.rt59.statemachine;
 
 import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
 /* 
- * This file stores the states as well as targets associated with them.
+ * This file stores the states as well as targets associated with them. Also houses the variable for the current stage.
  */
 public class StateManager {
     public enum RobotState {
