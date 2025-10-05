@@ -47,9 +47,23 @@ public final class Constants {
     public static final double DEADBAND = 0.1;// Joystick Deadband
     public static final double TURN_CONSTANT = 6;
   }
-  public static final class ArmConstants {
 
-    // Hold time on motor brakes when disabled
-    public static final double ARM_CAN_IDz = 10; // seconds
+  public static final class ArmConstants {
+    public static final int ARM_CAN_ID = 10;
+  }
+
+  public static final class ElevatorConstants {
+
+    public static final int ELEVATOR_CAN_ID = 51;
+    public static final double ELEVATOR_P = 0.300000011920928;
+    public static final double ELEVATOR_I = 0.000000999999997475242;
+    public static final double ELEVATOR_D = 0.300000011920928;
+    public static final double ELEVATOR_POS_CONVERSION = 1.0;
+    public static final double ELEVATOR_VEL_CONVERSION = 1.0;
+    public static final double ELEVATOR_FW_LIMIT = 48.0; // TODO: Verify
+    public static final double ELEVATOR_REVERSE_LIMIT = 0.0;
+    public static final boolean ELEVATOR_INVERTED = false; // TODO: Verify
+    public static final int ELEVATOR_CURRENT_LIMIT = 20; // TODO: Verify
+
   }
 }
