@@ -1,6 +1,7 @@
 package frc.rt59.subsystems;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -39,10 +40,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
         elevatorConfig.closedLoop.pidf(ElevatorConstants.ELEVATOR_P, ElevatorConstants.ELEVATOR_I,
                 ElevatorConstants.ELEVATOR_D, 0.00, ClosedLoopSlot.kSlot0);
-        elevatorConfig.encoder.positionConversionFactor(ElevatorConstants.ELEVATOR_POS_CONVERSION);
-        elevatorConfig.encoder.velocityConversionFactor(ElevatorConstants.ELEVATOR_VEL_CONVERSION);
+        elevatorConfig.encoder.positionConversionFactor(1);
+        elevatorConfig.encoder.velocityConversionFactor(1);
         // Apply Config!
         elevatorMotor.configure(elevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+    public void moveToPos(Double target) {
+        elevatorPID.setReference((target * ElevatorConstants.ELEVATOR_CONVERSION),ControlType.kPosition);
     }
 
 }

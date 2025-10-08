@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.rt59.Constants.DriverControlConstants;
+import frc.rt59.subsystems.ArmSubsystem;
 import frc.rt59.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -35,6 +35,7 @@ public class RobotContainer {
    */
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve"));
+  private final ArmSubsystem m_arm = new ArmSubsystem();
 
   /**
    * Drive Code
@@ -79,6 +80,9 @@ public class RobotContainer {
     driverXbox.back().whileTrue(drivebase.centerModulesCommand());
     driverXbox.leftBumper().onTrue(Commands.none());
     driverXbox.rightBumper().onTrue(Commands.none());
+    driverXbox.a().onTrue(m_arm.setAngleCommand(90));
+    driverXbox.b().onTrue(m_arm.setAngleCommand(180));
+
 
     /*
      * Test Controls

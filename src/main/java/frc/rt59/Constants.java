@@ -48,22 +48,45 @@ public final class Constants {
     public static final double TURN_CONSTANT = 6;
   }
 
-  public static final class ArmConstants {
-    public static final int ARM_CAN_ID = 10;
-  }
-
   public static final class ElevatorConstants {
 
     public static final int ELEVATOR_CAN_ID = 51;
     public static final double ELEVATOR_P = 0.300000011920928;
     public static final double ELEVATOR_I = 0.000000999999997475242;
     public static final double ELEVATOR_D = 0.300000011920928;
-    public static final double ELEVATOR_POS_CONVERSION = 1.0;
-    public static final double ELEVATOR_VEL_CONVERSION = 1.0;
+    public static final double ELEVATOR_CONVERSION = 1.889880952380952380952380952381;
     public static final double ELEVATOR_FW_LIMIT = 48.0; // TODO: Verify
     public static final double ELEVATOR_REVERSE_LIMIT = 0.0;
     public static final boolean ELEVATOR_INVERTED = false; // TODO: Verify
     public static final int ELEVATOR_CURRENT_LIMIT = 20; // TODO: Verify
+
+  }
+
+  public static final class ArmConstants {
+    // Basic Info
+    public static final int ARM_CAN_ID = 52;
+    // Ratios
+    public static final double ARM_CONVERSION = 3.5;
+    public static final double GEAR_RATIO = 102.8571428571429;
+    // Basic Config
+    public static final boolean ARM_BRAKE = true;
+    public static final boolean ARM_INVERTED = true;
+    public static final int ARM_CURRENT_LIMIT = 50;
+    // Kinematics
+
+    public static final double ARM_P = 0.05000000074505806;
+    public static final double ARM_I = 0.0000019999999949504854;
+    public static final double ARM_D = 0.1;
+    public static final double ARM_S = 0.0;
+    public static final double ARM_V = 12.59;
+    public static final double ARM_A = 0.29;
+    public static final double ARM_G = 0.7;
+
+    public static final double ARM_MAX_SPEED = 100;
+    public static final double ARM_MAX_ACCEL = 50;
+
+    // Subsystem Info
+    public static final double ARM_LENGTH = 0.9652;
 
   }
 }
