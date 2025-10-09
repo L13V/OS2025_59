@@ -82,6 +82,8 @@ public class RobotContainer {
     driverXbox.rightBumper().onTrue(Commands.none());
     driverXbox.a().onTrue(m_arm.setAngleCommand(90));
     driverXbox.b().onTrue(m_arm.setAngleCommand(180));
+    driverXbox.x().onTrue(m_arm.useSetAngleCommand());
+
 
 
     /*

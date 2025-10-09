@@ -41,19 +41,18 @@ public class ArmSubsystem extends SubsystemBase {
 
     // Tunables
     // Tunable PID gains
-    private final LoggedNetworkNumber kP = new LoggedNetworkNumber("/Arm/kP", ArmConstants.ARM_P);
-    private final LoggedNetworkNumber kI = new LoggedNetworkNumber("/Arm/kI", ArmConstants.ARM_I);
-    private final LoggedNetworkNumber kD = new LoggedNetworkNumber("/Arm/kD", ArmConstants.ARM_D);
+    private LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/Arm-kP", ArmConstants.ARM_P);
+    private LoggedNetworkNumber kI = new LoggedNetworkNumber("/Tuning/Arm-kI", ArmConstants.ARM_I);
+    private LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/Arm-kD", ArmConstants.ARM_D);
 
     // Tunable feedforward
-    private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Arm/kS", ArmConstants.ARM_S);
-    private final LoggedNetworkNumber kG = new LoggedNetworkNumber("/Arm/kG", ArmConstants.ARM_G);
-    private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Arm/kV", ArmConstants.ARM_V);
-    private final LoggedNetworkNumber kA = new LoggedNetworkNumber("/Arm/kA", ArmConstants.ARM_A);
+    private LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/Arm-kS", ArmConstants.ARM_S);
+    private LoggedNetworkNumber kG = new LoggedNetworkNumber("/Tuning/Arm-kG", ArmConstants.ARM_G);
+    private LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/Arm-kV", ArmConstants.ARM_V);
+    private LoggedNetworkNumber kA = new LoggedNetworkNumber("/Tuning/Arm-kA", ArmConstants.ARM_A);
 
     // Target angle (for testing)
-    // private final LoggedNetworkNumber targetAngleTunable = new
-    // LoggedNetworkNumber("/Arm/TargetDegrees", 90);
+    private LoggedNetworkNumber targetAngleTunable = new LoggedNetworkNumber("/Tuning/Arm-TargetDegrees", 90.0);
 
     // Control
     private final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(
@@ -82,7 +81,7 @@ public class ArmSubsystem extends SubsystemBase {
         // Sync relative encoder with absolute (degrees → rotations)
         armRelEncoder.setPosition(getArmAbsPosDegrees() / ArmConstants.ARM_CONVERSION);
 
-        armPID.setTolerance(0.5); // 1° tolerance
+        armPID.setTolerance(0.25); // 1° tolerance
     }
 
     @Override
@@ -90,16 +89,15 @@ public class ArmSubsystem extends SubsystemBase {
         armPID.setPID(kP.get(), kI.get(), kD.get());
         feedforward = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
 
-        SmartDashboard.putNumber("AbsPos (deg)", getArmAbsPosDegrees());
-        SmartDashboard.putNumber("RelPos (deg)", getArmRelPosDegrees());
-        SmartDashboard.putNumber("AngleWithinRotation", getAngleWithinRotationDegrees());
-        SmartDashboard.putNumber("RotationCount", getRotationCount());
-        SmartDashboard.putNumber("Target (deg)", targetPosition);
+        SmartDashboard.putNumber("Arm Absolute Encoder (deg)", getArmAbsPosDegrees());
+        SmartDashboard.putNumber("Arm Relative Encoder (deg)", getArmRelPosDegrees());
+        SmartDashboard.putNumber("Calculated Abosolue (deg)", getAngleWithinRotationDegrees());
+        SmartDashboard.putNumber("Calculated Rotations", getRotationCount());
+        SmartDashboard.putNumber("Arm Target (deg)", targetPosition);
         SmartDashboard.putNumber("Velocity (deg/s)", getVelocity());
         SmartDashboard.putNumber("Voltage (V)", getVoltage());
         SmartDashboard.putNumber("Current (A)", getCurrent());
         SmartDashboard.putNumber("Motor Temp (C)", getTemperature());
-
         SmartDashboard.putBoolean("OnTarget", onTarget());
 
         controlLoopFn();
@@ -122,11 +120,11 @@ public class ArmSubsystem extends SubsystemBase {
                 // Generated Voltage (Don't go above 12!!)
                 double totalVoltage = MathUtil.clamp(output + feedforwardOutput, -12, 12);
                 armPivotMotor.setVoltage(totalVoltage);
+                // armPivotMotor.setVoltage(output+feedforwardOutput);
 
                 SmartDashboard.putNumber("PID Output", output);
                 SmartDashboard.putNumber("FF Output", feedforwardOutput);
                 SmartDashboard.putNumber("Total Voltage", totalVoltage);
-                SmartDashboard.putNumber("PID Setpoint", targetPosition);
             }
 
             case VELOCITY -> {
@@ -154,18 +152,20 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     /**
-     * Finds the nearest rotation target in degrees
+     * Finds the nearest rotation target in degrees (Checking for either a
+     * counterclockwise, clockwise, or nearest solution is easier)
      * 
-     * @param target  Target position to reach
-     * @param current Current position
+     * @param targetWithin Target position to reach (Within the current rotation,
+     *                     ex: 760 degrees)
+     * @param current      Current position (Relative, ex: 720 degrees)
      */
-    private double findNearestPosition(double target, double current) {
-        double error = target - current;
+    private double findNearestPosition(double targetWithin, double current) {
+        double error = targetWithin - current;
         if (error > 180)
-            target -= 360;
+            targetWithin -= 360;
         if (error < -180)
-            target += 360;
-        return target;
+            targetWithin += 360;
+        return targetWithin;
     }
 
     public boolean onTarget() {
@@ -177,7 +177,14 @@ public class ArmSubsystem extends SubsystemBase {
      * Set a raw target angle in degrees
      */
     public void setRawAngle(double angleDegrees) {
+        armPID.reset(getArmRelPosDegrees()); // Fixes jolt at the beginning of the loop
         targetPosition = angleDegrees;
+        currentControlMode = ControlMode.POSITION;
+    }
+
+    public void useNTAngle() {
+        armPID.reset(getArmRelPosDegrees()); // Fixes jolt at the beginning of the loop
+        targetPosition = targetAngleTunable.get();
         currentControlMode = ControlMode.POSITION;
     }
 
@@ -234,9 +241,15 @@ public class ArmSubsystem extends SubsystemBase {
         return armPivotMotor.getMotorTemperature();
     }
 
-    /** Commands */
+    /*
+     * Commands
+     */
     public Command setAngleCommand(double angleDegrees) {
         return runOnce(() -> setRawAngle(angleDegrees));
+    }
+
+    public Command useSetAngleCommand() {
+        return runOnce(() -> useNTAngle());
     }
 
     public Command stopCommand() {
