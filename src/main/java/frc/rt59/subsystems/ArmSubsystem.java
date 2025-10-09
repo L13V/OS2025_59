@@ -172,26 +172,6 @@ public class ArmSubsystem extends SubsystemBase {
             }
         }
     }
-
-    /**
-     * Finds the nearest rotation target in degrees (Checking for either a
-     * counterclockwise, clockwise, or nearest solution is easier)
-     * 
-     * @param target  Target position to reach (Within the current rotation,
-     *                ex: 760 degrees)
-     * @param current Current position (Relative, ex: 720 degrees)
-     * 
-     * @return Returns closest angle (regardless of direction or rotation)
-     */
-    private double findNearestPosition(double target, double current) {
-        double error = target - current;
-        if (error > 180)
-            target -= 360;
-        if (error < -180)
-            target += 360;
-        return target;
-    }
-
     public boolean onTarget() {
         double error = Math.abs(targetPosition - getArmRelPosDegrees());
         return error < 0.25;

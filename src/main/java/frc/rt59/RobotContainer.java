@@ -40,7 +40,6 @@ public class RobotContainer {
   private final ArmSubsystem m_arm = new ArmSubsystem();
   private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
 
-
   /**
    * Drive Code
    */
@@ -82,14 +81,17 @@ public class RobotContainer {
      */
     driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
     driverXbox.back().whileTrue(drivebase.centerModulesCommand());
-    driverXbox.a().onTrue(m_arm.setArmAngleCommand(30,ArmDirections.NEAREST));
-    driverXbox.b().onTrue(m_arm.setArmAngleCommand(90,ArmDirections.NEAREST));
+    driverXbox.a().onTrue(m_arm.setArmAngleCommand(30, ArmDirections.NEAREST));
+    driverXbox.b().onTrue(m_arm.setArmAngleCommand(90, ArmDirections.NEAREST));
     driverXbox.x().onTrue(m_arm.setArmAngleCommand(180, ArmDirections.NEAREST));
     driverXbox.y().onTrue(m_arm.setArmAngleCommand(270, ArmDirections.NEAREST));
 
-    // driverXbox.x().onTrue(m_elevator.setElevatorPosCommand(0));
-    // driverXbox.y().onTrue(m_elevator.setElevatorPosCommand(20));
+    driverXbox.povUp().onTrue(m_elevator.setElevatorPosCommand(20));
+    driverXbox.povDown().onTrue(m_elevator.setElevatorPosCommand(0));
+    driverXbox.povLeft().onTrue(m_elevator.setElevatorPosCommand(10));
+
   }
+
   /*
    * Autonomous
    */
