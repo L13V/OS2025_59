@@ -14,10 +14,11 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.Constants.ArmConstants;
+
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ArmSubsystem extends SubsystemBase {
@@ -33,27 +34,31 @@ public class ArmSubsystem extends SubsystemBase {
         NEAREST
     }
 
-    // Hardware
+    /*
+     * Hardware
+     */
     private final SparkMax armPivotMotor = new SparkMax(ArmConstants.ARM_CAN_ID, MotorType.kBrushless);
     private final RelativeEncoder armRelEncoder = armPivotMotor.getEncoder();
     private final AbsoluteEncoder armAbsEncoder = armPivotMotor.getAbsoluteEncoder();
 
-    // Tunables
+    /*
+     * Tunables/ Targets
+     */
     // Tunable PID gains
-    private LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/Arm-kP", ArmConstants.ARM_P);
-    private LoggedNetworkNumber kI = new LoggedNetworkNumber("/Tuning/Arm-kI", ArmConstants.ARM_I);
-    private LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/Arm-kD", ArmConstants.ARM_D);
+    private LoggedNetworkNumber kP = new LoggedNetworkNumber("/Arm/Tuning/kP", ArmConstants.ARM_P);
+    private LoggedNetworkNumber kI = new LoggedNetworkNumber("/Arm/Tuning/kI", ArmConstants.ARM_I);
+    private LoggedNetworkNumber kD = new LoggedNetworkNumber("/Arm/Tuning/kD", ArmConstants.ARM_D);
 
     // Tunable feedforward
-    private LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/Arm-kS", ArmConstants.ARM_S);
-    private LoggedNetworkNumber kG = new LoggedNetworkNumber("/Tuning/Arm-kG", ArmConstants.ARM_G);
-    private LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/Arm-kV", ArmConstants.ARM_V);
-    private LoggedNetworkNumber kA = new LoggedNetworkNumber("/Tuning/Arm-kA", ArmConstants.ARM_A);
+    private LoggedNetworkNumber kS = new LoggedNetworkNumber("/Arm/Tuning/kS", ArmConstants.ARM_S);
+    private LoggedNetworkNumber kG = new LoggedNetworkNumber("/Arm/Tuning/kG", ArmConstants.ARM_G);
+    private LoggedNetworkNumber kV = new LoggedNetworkNumber("/Arm/Tuning/kV", ArmConstants.ARM_V);
+    private LoggedNetworkNumber kA = new LoggedNetworkNumber("/Arm/Tuning/kA", ArmConstants.ARM_A);
 
     // Target angle (for testing)
-    private LoggedNetworkNumber targetAngleTunable = new LoggedNetworkNumber("/Tuning/Arm-TargetDegrees", 90.0);
+    private LoggedNetworkNumber targetAngleTunable = new LoggedNetworkNumber("/Arm/TargetDegrees", 90.0);
 
-    // Control
+    // Control Loops/ PIDs
     private final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(
             ArmConstants.ARM_MAX_SPEED, ArmConstants.ARM_MAX_ACCEL);
     private ProfiledPIDController armPID = new ProfiledPIDController(kP.get(), kI.get(),
@@ -67,8 +72,29 @@ public class ArmSubsystem extends SubsystemBase {
     private double targetPosition = 90.0; // degrees
     private double targetVelocity = 0.0;
 
-    // Debug/test
+    /*
+     * Debugging/Testing
+     */
     double testingTarget = 0.0;
+
+    // NT Publishers
+    final LoggedNetworkNumber armAbsPosPub = new LoggedNetworkNumber("Arm/Absolute Encoder (deg)");
+    final LoggedNetworkNumber armRelPosPub = new LoggedNetworkNumber("Arm/Relative Encoder (deg)");
+    final LoggedNetworkNumber armCalcAbsPub = new LoggedNetworkNumber("Arm/Calculated Absolute (deg)");
+    final LoggedNetworkNumber armCalcRotPub = new LoggedNetworkNumber("Arm/Calculated Rotations");
+    final LoggedNetworkNumber armTargetPub = new LoggedNetworkNumber("Arm/Target (deg)");
+    final LoggedNetworkNumber armVelocityPub = new LoggedNetworkNumber("Arm/Velocity (deg-s)");
+    final LoggedNetworkNumber armVoltagePub = new LoggedNetworkNumber("Arm/Voltage (V)");
+    final LoggedNetworkNumber armCurrentPub = new LoggedNetworkNumber("Arm/Current (A)");
+    final LoggedNetworkNumber armTempPub = new LoggedNetworkNumber("Arm/Motor Temp (C)");
+    final LoggedNetworkBoolean armOnTargetPub = new LoggedNetworkBoolean("Arm/OnTarget");
+
+    final LoggedNetworkNumber PIDOutputPub = new LoggedNetworkNumber("Arm/PID Output (V)");
+    final LoggedNetworkNumber FFOutputPub = new LoggedNetworkNumber("Arm/FF Output (V)");
+    final LoggedNetworkNumber TotalVoltagePub = new LoggedNetworkNumber("Arm/Total Voltage (V)");
+
+    final LoggedNetworkNumber VelPIDOutputPub = new LoggedNetworkNumber("Arm/Velocity PID Output (V)");
+    final LoggedNetworkNumber VelFFOutputPub = new LoggedNetworkNumber("Arm/Velocity FF Output (V)");
 
     public ArmSubsystem() {
         // Motor config
@@ -85,20 +111,19 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        armPID.setPID(kP.get(), kI.get(), kD.get());
+        armPID.setPID(kP.get(), kI.get(), kD.get()); // Update PID
         feedforward = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
 
-        SmartDashboard.putNumber("Arm Absolute Encoder (deg)", getArmAbsPosDegrees());
-        SmartDashboard.putNumber("Arm Relative Encoder (deg)", getArmRelPosDegrees());
-        SmartDashboard.putNumber("Calculated Abosolue (deg)", getAngleWithinRotationDegrees());
-        SmartDashboard.putNumber("Calculated Rotations", getRotationCount());
-        SmartDashboard.putNumber("Arm Target (deg)", targetPosition);
-        SmartDashboard.putNumber("Velocity (deg/s)", getVelocity());
-        SmartDashboard.putNumber("Voltage (V)", getVoltage());
-        SmartDashboard.putNumber("Current (A)", getCurrent());
-        SmartDashboard.putNumber("Motor Temp (C)", getTemperature());
-        SmartDashboard.putBoolean("OnTarget", onTarget());
-
+        armAbsPosPub.set(getArmAbsPosDegrees());
+        armRelPosPub.set(getArmRelPosDegrees());
+        armCalcAbsPub.set(getAngleWithinRotationDegrees());
+        armCalcRotPub.set(getRotationCount());
+        armTargetPub.set(targetPosition);
+        armVelocityPub.set(getVelocity());
+        armVoltagePub.set(getVoltage());
+        armCurrentPub.set(getCurrent());
+        armTempPub.set(getTemperature());
+        armOnTargetPub.set(onTarget());
         armControlLoop();
     }
 
@@ -119,11 +144,10 @@ public class ArmSubsystem extends SubsystemBase {
                 // Generated Voltage (Don't go above 12!!)
                 double totalVoltage = MathUtil.clamp(output + feedforwardOutput, -12, 12);
                 armPivotMotor.setVoltage(totalVoltage);
-                // armPivotMotor.setVoltage(output+feedforwardOutput);
-
-                SmartDashboard.putNumber("PID Output", output);
-                SmartDashboard.putNumber("FF Output", feedforwardOutput);
-                SmartDashboard.putNumber("Total Voltage", totalVoltage);
+                // NT
+                PIDOutputPub.set(output);
+                FFOutputPub.set(feedforwardOutput);
+                TotalVoltagePub.set(totalVoltage);
             }
 
             case VELOCITY -> {
@@ -137,10 +161,10 @@ public class ArmSubsystem extends SubsystemBase {
 
                 double totalVoltage = MathUtil.clamp(output + velFeedforward, -12, 12);
                 armPivotMotor.setVoltage(totalVoltage);
-
-                SmartDashboard.putNumber("Vel PID Output", output);
-                SmartDashboard.putNumber("Vel FF Output", velFeedforward);
-                SmartDashboard.putNumber("Vel Total Voltage", totalVoltage);
+                // NT
+                TotalVoltagePub.set(totalVoltage);
+                VelPIDOutputPub.set(output);
+                VelFFOutputPub.set(velFeedforward);
             }
 
             case OPEN_LOOP -> {
@@ -153,22 +177,24 @@ public class ArmSubsystem extends SubsystemBase {
      * Finds the nearest rotation target in degrees (Checking for either a
      * counterclockwise, clockwise, or nearest solution is easier)
      * 
-     * @param targetWithin Target position to reach (Within the current rotation,
-     *                     ex: 760 degrees)
-     * @param current      Current position (Relative, ex: 720 degrees)
+     * @param target  Target position to reach (Within the current rotation,
+     *                ex: 760 degrees)
+     * @param current Current position (Relative, ex: 720 degrees)
+     * 
+     * @return Returns closest angle (regardless of direction or rotation)
      */
-    private double findNearestPosition(double targetWithin, double current) {
-        double error = targetWithin - current;
+    private double findNearestPosition(double target, double current) {
+        double error = target - current;
         if (error > 180)
-            targetWithin -= 360;
+            target -= 360;
         if (error < -180)
-            targetWithin += 360;
-        return targetWithin;
+            target += 360;
+        return target;
     }
 
     public boolean onTarget() {
         double error = Math.abs(targetPosition - getArmRelPosDegrees());
-        return error < 1.0;
+        return error < 0.25;
     }
 
     /**
@@ -178,6 +204,51 @@ public class ArmSubsystem extends SubsystemBase {
         armPID.reset(getArmRelPosDegrees()); // Fixes jolt at the beginning of the loop
         targetPosition = angleDegrees;
         currentControlMode = ControlMode.POSITION;
+    }
+
+    public void setArmAngle(double inputAngle, ArmDirections direction) { // Input: 300
+        final double initalarmAngle = getArmRelPosDegrees(); // 760
+        final double currentRotationStartAngle = (initalarmAngle - (initalarmAngle % 360)); // 720
+        final double TargetPosWithinRotation = currentRotationStartAngle + inputAngle; // 1020
+        double calculatedTarget = TargetPosWithinRotation; // 1020
+
+        armPID.reset(initalarmAngle); // Fixes jolt at the beginning of the loop
+        switch (direction) {
+            case NEAREST -> {
+                double travelToNearest = calculatedTarget - initalarmAngle; // 1020-760=260
+                if (travelToNearest > 180) {
+                    calculatedTarget -= 360;
+                } else if (travelToNearest < -180) {
+                    calculatedTarget += 360;
+                }
+                targetPosition = calculatedTarget;
+                currentControlMode = ControlMode.POSITION;
+            }
+
+            case CW -> {
+                if (calculatedTarget < initalarmAngle+2) {
+                    // Then it works!
+                } else {
+                    calculatedTarget -= 360;
+                }
+                targetPosition = calculatedTarget;
+                currentControlMode = ControlMode.POSITION;
+                
+            }
+
+            case CCW -> {
+                if (calculatedTarget > initalarmAngle-2) {
+                    // Then it works!
+                } else {
+                    calculatedTarget += 360;
+                }
+                targetPosition = calculatedTarget;
+                currentControlMode = ControlMode.POSITION;
+            }
+        }
+
+        // targetPosition = angleDegrees;
+        // currentControlMode = ControlMode.POSITION;
     }
 
     public void useNTAngle() {
@@ -242,11 +313,14 @@ public class ArmSubsystem extends SubsystemBase {
     /*
      * Commands
      */
-    public Command setAngleCommand(double angleDegrees) {
+    public Command setRawAngleCommand(double angleDegrees) {
         return runOnce(() -> setRawAngle(angleDegrees));
     }
+    public Command setArmAngleCommand(double inputAngle, ArmDirections direction) {
+        return runOnce(() -> setArmAngle(inputAngle, direction));
+    }
 
-    public Command useSetAngleCommand() {
+    public Command useNTAngleCommand() {
         return runOnce(() -> useNTAngle());
     }
 

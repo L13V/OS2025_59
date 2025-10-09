@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-import org.littletonrobotics.junction.LogFileUtil;
 
 /**
  * The VM is configured to automatically run this class, and to call the

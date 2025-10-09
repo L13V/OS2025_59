@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.rt59.Constants.DriverControlConstants;
 import frc.rt59.subsystems.ArmSubsystem;
+import frc.rt59.subsystems.ElevatorSubsystem;
+import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
 import frc.rt59.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -36,6 +38,8 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve"));
   private final ArmSubsystem m_arm = new ArmSubsystem();
+  private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
+
 
   /**
    * Drive Code
@@ -78,25 +82,14 @@ public class RobotContainer {
      */
     driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
     driverXbox.back().whileTrue(drivebase.centerModulesCommand());
-    driverXbox.leftBumper().onTrue(Commands.none());
-    driverXbox.rightBumper().onTrue(Commands.none());
-    driverXbox.a().onTrue(m_arm.setAngleCommand(90));
-    driverXbox.b().onTrue(m_arm.setAngleCommand(180));
-    driverXbox.x().onTrue(m_arm.useSetAngleCommand());
+    driverXbox.a().onTrue(m_arm.setArmAngleCommand(30,ArmDirections.NEAREST));
+    driverXbox.b().onTrue(m_arm.setArmAngleCommand(90,ArmDirections.NEAREST));
+    driverXbox.x().onTrue(m_arm.setArmAngleCommand(180, ArmDirections.NEAREST));
+    driverXbox.y().onTrue(m_arm.setArmAngleCommand(270, ArmDirections.NEAREST));
 
-
-
-    /*
-     * Test Controls
-     */
-    if (DriverStation.isTest()) {
-      // driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock,
-      // drivebase).repeatedly());
-      // driverXbox.y().whileTrue(drivebase.driveToDistanceCommand(1.0, 0.2));
-
-    }
+    // driverXbox.x().onTrue(m_elevator.setElevatorPosCommand(0));
+    // driverXbox.y().onTrue(m_elevator.setElevatorPosCommand(20));
   }
-
   /*
    * Autonomous
    */

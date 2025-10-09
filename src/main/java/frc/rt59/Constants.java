@@ -73,24 +73,16 @@ public final class Constants {
     public static final boolean ARM_INVERTED = true;
     public static final int ARM_CURRENT_LIMIT = 50;
     // Kinematics
-
-    // public static final double ARM_P = 0.05000000074505806;
-    // public static final double ARM_I = 0.0000019999999949504854;
-    // public static final double ARM_D = 0.1;
-    // public static final double ARM_S = 0.0;
-    // public static final double ARM_V = 12.59;
-    // public static final double ARM_A = 0.29;
-    // public static final double ARM_G = 0.7;
-    public static final double ARM_P = 0.12;
-    public static final double ARM_I = 0.15;
-    public static final double ARM_D = 0;
+    public static final double ARM_P = 0.17;
+    public static final double ARM_I = 0.4;
+    public static final double ARM_D = 0.035;
     public static final double ARM_S = 0.0;
     public static final double ARM_V = 2.0;
     public static final double ARM_A = 0.19;
     public static final double ARM_G = 0.54;
 
-    public static final double ARM_MAX_SPEED = 600;
-    public static final double ARM_MAX_ACCEL = 850;
+    public static final double ARM_MAX_SPEED = 580;
+    public static final double ARM_MAX_ACCEL = 600;
   
 
     // Subsystem Info
