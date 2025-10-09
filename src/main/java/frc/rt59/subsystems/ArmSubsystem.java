@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.Constants.ArmConstants;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ArmSubsystem extends SubsystemBase {
@@ -78,10 +77,10 @@ public class ArmSubsystem extends SubsystemBase {
         armConfig.smartCurrentLimit(ArmConstants.ARM_CURRENT_LIMIT);
         armPivotMotor.configure(armConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
-        // Sync relative encoder with absolute (degrees → rotations)
+        // Sync relative encoder with absolute (degrees -> rotations)
         armRelEncoder.setPosition(getArmAbsPosDegrees() / ArmConstants.ARM_CONVERSION);
 
-        armPID.setTolerance(0.25); // 1° tolerance
+        armPID.setTolerance(0.25); // 0.25 degree tolerance
     }
 
     @Override
@@ -100,11 +99,11 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Motor Temp (C)", getTemperature());
         SmartDashboard.putBoolean("OnTarget", onTarget());
 
-        controlLoopFn();
+        armControlLoop();
     }
 
     /** Main control loop */
-    private void controlLoopFn() {
+    private void armControlLoop() {
         switch (currentControlMode) {
             case POSITION -> {
                 // Gather Signals
@@ -130,7 +129,6 @@ public class ArmSubsystem extends SubsystemBase {
             case VELOCITY -> {
                 double currentVel = getVelocity(); // degrees/sec
                 double output = armPID.calculate(currentVel, targetVelocity);
-
                 double accel = armPID.getSetpoint().velocity - currentVel;
                 double angleRad = Units.degreesToRadians(getArmRelPosDegrees());
                 double velFeedforward = feedforward.calculate(angleRad,
