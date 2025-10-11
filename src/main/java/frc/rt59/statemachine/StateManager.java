@@ -15,8 +15,13 @@ public class StateManager extends SubsystemBase {
 
     // Enum that defines all possible robot states
     public enum RobotState {
-        PLUCK(0, 96.0, ArmDirections.NEAREST), STARTING(0, 90.0, ArmDirections.NEAREST), STOW(5, 96.0, ArmDirections.NEAREST), L1(0, 90.0,
-                ArmDirections.NEAREST), L2(15.0, 30.0, ArmDirections.NEAREST), L3(17.5, 200, ArmDirections.NEAREST), L4(15, 270, ArmDirections.NEAREST);
+        PLUCK(0, 96.0, ArmDirections.NEAREST),
+        STARTING(0, 90.0, ArmDirections.NEAREST),
+        STOW(5, 96.0, ArmDirections.NEAREST),
+        L1(0, 90.0, ArmDirections.NEAREST),
+        L2(15.0, 30.0, ArmDirections.NEAREST),
+        L3(17.5, 200, ArmDirections.NEAREST),
+        L4(15, 270, ArmDirections.NEAREST);
 
         // Each state stores its own parameters
         public final double targetElevatorHeight;
@@ -44,7 +49,8 @@ public class StateManager extends SubsystemBase {
     final LoggedNetworkString targetStatePub = new LoggedNetworkString("State Machine/Target State");
 
     // Constructor takes subsystem references (for convenience)
-    public StateManager(ElevatorSubsystem elevator, ArmSubsystem arm, IndexerSubsystem indexer, EndEffectorSubsystem endeffector) {
+    public StateManager(ElevatorSubsystem elevator, ArmSubsystem arm, IndexerSubsystem indexer,
+            EndEffectorSubsystem endeffector) {
         this.elevator = elevator;
         this.arm = arm;
         this.indexer = indexer;
@@ -83,11 +89,13 @@ public class StateManager extends SubsystemBase {
             new SetStateCommand(this, elevator, arm, RobotState.STOW).schedule();
         }
         // Check for coral in order to pluck
-        if ((currentState == RobotState.STOW) && indexer.hasCoral() && !endeffector.hasCoral() && targetState != RobotState.PLUCK) {
+        if ((currentState == RobotState.STOW) && indexer.hasCoral() && !endeffector.hasCoral()
+                && targetState != RobotState.PLUCK) {
             new SetStateCommand(this, elevator, arm, RobotState.PLUCK).schedule();
         }
         // Check for endeffector coral after pluck
-        if ((currentState == RobotState.PLUCK) && !indexer.hasCoral() && endeffector.hasCoral() && targetState != RobotState.STOW) {
+        if ((currentState == RobotState.PLUCK) && !indexer.hasCoral() && endeffector.hasCoral()
+                && targetState != RobotState.STOW) {
             new SetStateCommand(this, elevator, arm, RobotState.STOW).schedule();
         }
 
