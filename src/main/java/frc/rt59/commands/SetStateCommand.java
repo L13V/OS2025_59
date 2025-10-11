@@ -1,8 +1,6 @@
 // SetStateCommand.java
 package frc.rt59.commands;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.rt59.Constants.ArmConstants;
 import frc.rt59.statemachine.StateManager;
@@ -51,6 +49,10 @@ public class SetStateCommand extends Command {
         return threshold;
     }
 
+    /*
+     * STATE CHANGE STUFF
+     */
+
     private final StateManager stateManager;
     private final ElevatorSubsystem elevator;
     private final ArmSubsystem arm;
@@ -71,8 +73,6 @@ public class SetStateCommand extends Command {
     private boolean armCommanded = false;
     private boolean elevatorCommanded = false;
     private boolean phase1Started = false;
-    private boolean phase2Started = false;
-    // Inital Positions
 
     public SetStateCommand(StateManager stateManager, ElevatorSubsystem elevator, ArmSubsystem arm,
             RobotState targetState) {
@@ -86,6 +86,7 @@ public class SetStateCommand extends Command {
 
     @Override
     public void initialize() {
+        // Runs when command starts
         stateManager.setTargetState(targetState);
         armDirection = targetState.armDirection;
 
@@ -100,7 +101,6 @@ public class SetStateCommand extends Command {
         armCommanded = false;
         elevatorCommanded = false;
         phase1Started = false;
-        phase2Started = false;
 
         // Figure out threshold based on target and inital arm angles
         threshold = computeSafeThreshold(initalAbsArmAngle, targetArmPos);
@@ -151,20 +151,6 @@ public class SetStateCommand extends Command {
             } else if (!phase1Started && !armAtSafeAngle && startAboveThreshold && !armCommanded) {
                 phase1Started = true;
             }
-            // // Step 1: Move arm to safe angle first
-            // if (startAboveThreshold && phase1Started && !phase2Started && !armAtSafeAngle
-            // && !armCommanded) {
-            // arm.setArmAngle(SAFE_ARM_ANGLE, ArmDirections.NEAREST);
-            // armCommanded = true;
-            // return;
-            // }
-
-            // // Step 2: Once arm is safe, move elevator down
-            // if (!phase2Started && armAtSafeAngle) {
-            // phase2Started = true;
-            // armCommanded = false; // allow arm to later move to final target
-            // }
-
             if (startAboveThreshold && phase1Started) {
                 if (!armCommanded) {
                     arm.setArmAngle(targetArmPos, armDirection);
