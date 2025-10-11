@@ -7,11 +7,13 @@ package frc.rt59;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
@@ -46,6 +48,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
     Logger.recordMetadata("ProjectName", "RT OffSeason"); // Set a metadata value TODO: Figure out Logging plz
+    LoggedPowerDistribution.getInstance(1, ModuleType.kRev); // Example: PDH on CAN ID 50
     if (isReal()) {
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables

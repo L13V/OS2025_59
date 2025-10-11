@@ -1,45 +1,122 @@
-// // StateManager.java
-// package frc.rt59.statemachine;
+// StateManager.java
+package frc.rt59.statemachine;
 
-// import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
-// /* 
-//  * This file stores the states as well as targets associated with them. Also houses the variable for the current stage.
-//  */
-// public class StateManager {
-//     public enum RobotState {
-//         STOW(5.0, 10.0, ArmDirections.CCW),
-//         L1(5.0, 10.0, ArmDirections.CCW),
-//         L2(15.0, 25.0, ArmDirections.CCW),
-//         L3(30.0, 40.0, ArmDirections.CW),
-//         L4(45.0, 55.0, ArmDirections.CW);
+import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
-//         public final double targetElevatorHeight;
-//         public final double targetArmAngle;
-//         public final ArmDirections armDirections;
+import com.fasterxml.jackson.databind.deser.SettableAnyProperty;
 
-//         RobotState(double targetElevatorHeight, double targetArmAngle, ArmDirections armDirection) {
-//             this.targetElevatorHeight = targetElevatorHeight;
-//             this.targetArmAngle = targetArmAngle;
-//             this.armDirections = armDirection;
-//         }
-//     }
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.rt59.Robot;
+import frc.rt59.commands.SetStateCommand;
+import frc.rt59.subsystems.ArmSubsystem;
+import frc.rt59.subsystems.ElevatorSubsystem;
+import frc.rt59.subsystems.EndEffectorSubsystem;
+import frc.rt59.subsystems.IndexerSubsystem;
+import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
 
-//     private RobotState currentState = RobotState.STOW;
-//     private RobotState targetState = RobotState.STOW;
+public class StateManager extends SubsystemBase {
 
-//     public RobotState getCurrentState() {
-//         return currentState;
-//     }
+    // Enum that defines all possible robot states
+    public enum RobotState {
+        PLUCK(0,96.0,ArmDirections.NEAREST),
+        STARTING(0, 90.0, ArmDirections.NEAREST), 
+        STOW(5, 96.0, ArmDirections.NEAREST), 
+        L1(0, 90.0, ArmDirections.NEAREST), 
+        L2(15.0, 30.0, ArmDirections.NEAREST), 
+        L3(17.5, 200,ArmDirections.NEAREST), 
+        L4(15, 270, ArmDirections.NEAREST);
 
-//     public RobotState getTargetState() {
-//         return targetState;
-//     }
+        // Each state stores its own parameters
+        public final double targetElevatorHeight;
+        public final double targetArmAngle;
+        public final ArmDirections armDirection;
 
-//     public void setTargetState(RobotState target) {
-//         targetState = target;
-//     }
+        // Constructor to set values for each state
+        RobotState(double elevatorHeight, double armAngle, ArmDirections armDirection) {
+            this.targetElevatorHeight = elevatorHeight;
+            this.targetArmAngle = armAngle;
+            this.armDirection = armDirection;
+        }
+    }
 
-//     public void confirmStateReached() {
-//         currentState = targetState;
-//     }
-// }
+    // References to your subsystems
+    private final ElevatorSubsystem elevator;
+    private final ArmSubsystem arm;
+    private final IndexerSubsystem indexer;
+    private final EndEffectorSubsystem endeffector;
+
+    // Track the current and target states
+    private RobotState currentState = RobotState.STARTING;
+    private RobotState targetState = RobotState.STARTING;
+    final LoggedNetworkString currentStatePub = new LoggedNetworkString("State Machine/Current State");
+    final LoggedNetworkString targetStatePub = new LoggedNetworkString("State Machine/Target State");
+
+
+
+    // Constructor takes subsystem references (for convenience)
+    public StateManager(ElevatorSubsystem elevator, ArmSubsystem arm, IndexerSubsystem indexer, EndEffectorSubsystem endeffector) {
+        this.elevator = elevator;
+        this.arm = arm;
+        this.indexer = indexer;
+        this.endeffector = endeffector;
+    }
+
+    // Accessors for subsystems
+    public ElevatorSubsystem getElevator() {
+        return elevator;
+    }
+
+    public ArmSubsystem getArm() {
+        return arm;
+    }
+
+    // Getters and setters for state tracking
+    public RobotState getCurrentState() {
+        return currentState;
+    }
+
+    public RobotState getTargetState() {
+        return targetState;
+    }
+
+    public void setTargetState(RobotState target) {
+        targetState = target;
+    }
+
+    public void confirmStateReached() {
+        currentState = targetState;
+    }
+
+    public void periodic() {
+        if (currentState == RobotState.STARTING && targetState != RobotState.STOW ) {
+            new SetStateCommand(this,elevator,arm,RobotState.STOW).schedule();
+        }
+        if ((currentState == RobotState.STOW) && indexer.hasCoral() && !endeffector.hasCoral() && targetState != RobotState.PLUCK) {
+            new SetStateCommand(this,elevator,arm,RobotState.PLUCK).schedule();
+        }
+        if ((currentState == RobotState.PLUCK) && !indexer.hasCoral() && endeffector.hasCoral() && targetState != RobotState.STOW) {
+            new SetStateCommand(this,elevator,arm,RobotState.STOW).schedule();
+        }
+
+        switch (targetState) {
+            case STOW -> {
+                indexer.setPower(0.7);;
+                endeffector.setPower(0.05);
+            }
+            case PLUCK -> {
+                indexer.stop();
+                endeffector.setPower(0.2);
+            }
+            default -> {
+
+            }
+        }
+        currentStatePub.set(currentState.name());
+        targetStatePub.set(targetState.name());
+
+
+    }
+}

@@ -9,29 +9,29 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.Constants.ArmConstants;
+
+import javax.swing.text.Position;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ArmSubsystem extends SubsystemBase {
     private enum ControlMode {
-        OPEN_LOOP,
-        POSITION,
-        VELOCITY,
+        OPEN_LOOP, POSITION, VELOCITY,
     }
 
     public enum ArmDirections {
-        CW,
-        CCW,
-        NEAREST
+        CW, CCW, NEAREST
     }
 
     /*
@@ -40,6 +40,7 @@ public class ArmSubsystem extends SubsystemBase {
     private final SparkMax armPivotMotor = new SparkMax(ArmConstants.ARM_CAN_ID, MotorType.kBrushless);
     private final RelativeEncoder armRelEncoder = armPivotMotor.getEncoder();
     private final AbsoluteEncoder armAbsEncoder = armPivotMotor.getAbsoluteEncoder();
+    private boolean hasSyncedRelEncoder = false;
 
     /*
      * Tunables/ Targets
@@ -66,7 +67,7 @@ public class ArmSubsystem extends SubsystemBase {
     private ArmFeedforward feedforward = new ArmFeedforward(kS.get(), kG.get(),
             kV.get(), kA.get());
 
-    private final SparkMaxConfig armConfig = new SparkMaxConfig();
+    private SparkMaxConfig armConfig = new SparkMaxConfig();
 
     private ControlMode currentControlMode = ControlMode.OPEN_LOOP;
     private double targetPosition = 90.0; // degrees
@@ -78,6 +79,8 @@ public class ArmSubsystem extends SubsystemBase {
     double testingTarget = 0.0;
 
     // NT Publishers
+    final LoggedNetworkBoolean PositionSynced = new LoggedNetworkBoolean("Arm/Position Synced");
+
     final LoggedNetworkNumber armAbsPosPub = new LoggedNetworkNumber("Arm/Absolute Encoder (deg)");
     final LoggedNetworkNumber armRelPosPub = new LoggedNetworkNumber("Arm/Relative Encoder (deg)");
     final LoggedNetworkNumber armCalcAbsPub = new LoggedNetworkNumber("Arm/Calculated Absolute (deg)");
@@ -104,7 +107,6 @@ public class ArmSubsystem extends SubsystemBase {
         armPivotMotor.configure(armConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         // Sync relative encoder with absolute (degrees -> rotations)
-        armRelEncoder.setPosition(getArmAbsPosDegrees() / ArmConstants.ARM_CONVERSION);
 
         armPID.setTolerance(0.25); // 0.25 degree tolerance
     }
@@ -113,6 +115,8 @@ public class ArmSubsystem extends SubsystemBase {
     public void periodic() {
         armPID.setPID(kP.get(), kI.get(), kD.get()); // Update PID
         feedforward = new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get());
+
+        PositionSynced.set(hasSyncedRelEncoder);
 
         armAbsPosPub.set(getArmAbsPosDegrees());
         armRelPosPub.set(getArmRelPosDegrees());
@@ -125,6 +129,10 @@ public class ArmSubsystem extends SubsystemBase {
         armTempPub.set(getTemperature());
         armOnTargetPub.set(onTarget());
         armControlLoop();
+
+        // Sync the relative encoder once, when the absolute reading looks valid
+        syncEncoderLoop();
+
     }
 
     /** Main control loop */
@@ -172,9 +180,32 @@ public class ArmSubsystem extends SubsystemBase {
             }
         }
     }
+
+    public void syncEncoderLoop() {
+        if (!hasSyncedRelEncoder) {
+            double absDeg = getArmAbsPosDegrees();
+            if (Math.abs(absDeg) > 0.001) { // avoid syncing to zero or invalid reading
+                armRelEncoder.setPosition(absDeg / ArmConstants.ARM_CONVERSION);
+                if (Math.abs(absDeg - getAngleWithinRotationDegrees()) <= 0.5) {
+                    hasSyncedRelEncoder = true;
+                }
+            }
+        }
+    }
+
     public boolean onTarget() {
         double error = Math.abs(targetPosition - getArmRelPosDegrees());
         return error < 0.25;
+    }
+
+    public boolean atPosition(double test) {
+        double error = Math.abs(test - getAngleWithinRotationDegrees());
+        return error < 5;
+    }
+
+    public boolean atSafeAngle() {
+        double error = Math.abs(getAngleWithinRotationDegrees() - ArmConstants.SAFE_ARM_ANGLE);
+        return error < 0.5;
     }
 
     /**
@@ -206,18 +237,18 @@ public class ArmSubsystem extends SubsystemBase {
             }
 
             case CW -> {
-                if (calculatedTarget < initalarmAngle+2) {
+                if (calculatedTarget < initalarmAngle + 2) {
                     // Then it works!
                 } else {
                     calculatedTarget -= 360;
                 }
                 targetPosition = calculatedTarget;
                 currentControlMode = ControlMode.POSITION;
-                
+
             }
 
             case CCW -> {
-                if (calculatedTarget > initalarmAngle-2) {
+                if (calculatedTarget > initalarmAngle - 2) {
                     // Then it works!
                 } else {
                     calculatedTarget += 360;
@@ -229,6 +260,45 @@ public class ArmSubsystem extends SubsystemBase {
 
         // targetPosition = angleDegrees;
         // currentControlMode = ControlMode.POSITION;
+    }
+
+    public double calculateArmTargetAngle(double inputAngle, ArmDirections direction) {
+        final double initalarmAngle = getArmRelPosDegrees(); // 760
+        final double currentRotationStartAngle = (initalarmAngle - (initalarmAngle % 360)); // 720
+        final double TargetPosWithinRotation = currentRotationStartAngle + inputAngle; // 1020
+        double calculatedTarget = TargetPosWithinRotation; // 1020
+        switch (direction) {
+            case NEAREST -> {
+                double travelToNearest = calculatedTarget - initalarmAngle; // 1020-760=260
+                if (travelToNearest > 180) {
+                    calculatedTarget -= 360;
+                } else if (travelToNearest < -180) {
+                    calculatedTarget += 360;
+                }
+                return calculatedTarget;
+
+            }
+
+            case CW -> {
+                if (calculatedTarget < initalarmAngle + 2) {
+                    // Then it works!
+                } else {
+                    calculatedTarget -= 360;
+                }
+                return calculatedTarget;
+
+            }
+
+            case CCW -> {
+                if (calculatedTarget > initalarmAngle - 2) {
+                    // Then it works!
+                } else {
+                    calculatedTarget += 360;
+                }
+                return calculatedTarget;
+            }
+        }
+        return calculatedTarget;
     }
 
     public void useNTAngle() {
@@ -296,6 +366,7 @@ public class ArmSubsystem extends SubsystemBase {
     public Command setRawAngleCommand(double angleDegrees) {
         return runOnce(() -> setRawAngle(angleDegrees));
     }
+
     public Command setArmAngleCommand(double inputAngle, ArmDirections direction) {
         return runOnce(() -> setArmAngle(inputAngle, direction));
     }
