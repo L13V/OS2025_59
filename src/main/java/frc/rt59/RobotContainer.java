@@ -16,6 +16,7 @@ import frc.rt59.statemachine.StateManager.RobotState;
 import frc.rt59.subsystems.ArmSubsystem;
 import frc.rt59.subsystems.ElevatorSubsystem;
 import frc.rt59.subsystems.EndEffectorSubsystem;
+import frc.rt59.subsystems.FloorIntakeSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
 import frc.rt59.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
@@ -43,11 +44,11 @@ public class RobotContainer {
             "swerve"));
     private final ArmSubsystem m_arm = new ArmSubsystem();
     private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
+    private final FloorIntakeSubsystem m_floorintake = new FloorIntakeSubsystem();
     private final IndexerSubsystem m_indexer = new IndexerSubsystem();
     private final EndEffectorSubsystem m_endeffector = new EndEffectorSubsystem();
     private final StateManager m_statemanager = new StateManager(m_elevator, m_arm, m_indexer, m_endeffector);
 
-    
     // private final SetStateCommand m_statemachine = new
     // SetStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
 
@@ -113,7 +114,6 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return drivebase.getAutonomousCommand("Forward");
-        // return null;
     }
 
     public void setMotorBrake(boolean brake) {

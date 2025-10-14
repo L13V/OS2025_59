@@ -21,7 +21,9 @@ import frc.rt59.Constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
     private enum ControlMode {
-        OPEN_LOOP, POSITION, VELOCITY,
+        OPEN_LOOP,
+        POSITION,
+        VELOCITY,
     }
 
     /*
@@ -151,16 +153,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    public boolean onTarget() {
-        double error = Math.abs(targetPosition - getElevatorPos());
-        return error < 0.1;
-    }
-
-    public boolean atPosition(double test) {
-        double error = Math.abs(test - getElevatorPos());
-        return error < 0.2;
-    }
-
     public void setElevatorPos(Double target) {
         elevatorPID.reset(getElevatorPos()); // Fixes jolt at the beginning of the loop
 
@@ -203,6 +195,16 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public double getTemperature() {
         return (elevatorMotor.getMotorTemperature());
+    }
+
+    public boolean onTarget() {
+        double error = Math.abs(targetPosition - getElevatorPos());
+        return error < 0.1;
+    }
+
+    public boolean atPosition(double test) {
+        double error = Math.abs(test - getElevatorPos());
+        return error < 0.2;
     }
 
     /*

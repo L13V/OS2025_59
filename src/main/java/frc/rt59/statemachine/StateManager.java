@@ -15,9 +15,9 @@ public class StateManager extends SubsystemBase {
 
     // Enum that defines all possible robot states
     public enum RobotState {
-        PLUCK(0, 96.0, ArmDirections.NEAREST),
+        PLUCK(0, 90.0, ArmDirections.NEAREST),
         STARTING(0, 90.0, ArmDirections.NEAREST),
-        STOW(5, 96.0, ArmDirections.NEAREST),
+        STOW(5, 90.0, ArmDirections.NEAREST),
         L1(0, 90.0, ArmDirections.NEAREST),
         L2(15.0, 30.0, ArmDirections.NEAREST),
         L3(17.5, 200, ArmDirections.NEAREST),
@@ -94,19 +94,19 @@ public class StateManager extends SubsystemBase {
             new SetStateCommand(this, elevator, arm, RobotState.PLUCK).schedule();
         }
         // Check for endeffector coral after pluck
-        if ((currentState == RobotState.PLUCK) && !indexer.hasCoral() && endeffector.hasCoral()
+        if ((currentState == RobotState.PLUCK) && endeffector.hasCoral()
                 && targetState != RobotState.STOW) {
             new SetStateCommand(this, elevator, arm, RobotState.STOW).schedule();
         }
 
         switch (targetState) {
             case STOW -> {
-                indexer.setRpm(2000);
+                indexer.setRpm(-5000);
                 endeffector.setPower(0.05);
             }
             case PLUCK -> {
                 indexer.stop();
-                endeffector.setPower(0.2);
+                endeffector.setPower(0.4);
             }
             default -> {
 

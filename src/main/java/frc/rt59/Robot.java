@@ -47,7 +47,7 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotInit() {
-    Logger.recordMetadata("ProjectName", "RT OffSeason"); // Set a metadata value TODO: Figure out Logging plz
+    Logger.recordMetadata("ProjectName", "RT OffSeason"); // Set a metadata value
     LoggedPowerDistribution.getInstance(1, ModuleType.kRev); // Example: PDH on CAN ID 50
     if (isReal()) {
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
