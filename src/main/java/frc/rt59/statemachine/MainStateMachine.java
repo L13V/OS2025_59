@@ -11,7 +11,7 @@ import frc.rt59.subsystems.EndEffectorSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
 import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
 
-public class StateManager extends SubsystemBase {
+public class MainStateMachine extends SubsystemBase {
 
     // Enum that defines all possible robot states
     public enum RobotState {
@@ -49,7 +49,7 @@ public class StateManager extends SubsystemBase {
     final LoggedNetworkString targetStatePub = new LoggedNetworkString("State Machine/Target State");
 
     // Constructor takes subsystem references (for convenience)
-    public StateManager(ElevatorSubsystem elevator, ArmSubsystem arm, IndexerSubsystem indexer,
+    public MainStateMachine(ElevatorSubsystem elevator, ArmSubsystem arm, IndexerSubsystem indexer,
             EndEffectorSubsystem endeffector) {
         this.elevator = elevator;
         this.arm = arm;

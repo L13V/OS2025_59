@@ -3,8 +3,8 @@ package frc.rt59.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.rt59.Constants.ArmConstants;
-import frc.rt59.statemachine.StateManager;
-import frc.rt59.statemachine.StateManager.RobotState;
+import frc.rt59.statemachine.MainStateMachine;
+import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ElevatorSubsystem;
 import frc.rt59.subsystems.ArmSubsystem;
 import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
@@ -53,7 +53,7 @@ public class SetStateCommand extends Command {
      * STATE CHANGE STUFF
      */
 
-    private final StateManager stateManager;
+    private final MainStateMachine stateManager;
     private final ElevatorSubsystem elevator;
     private final ArmSubsystem arm;
     private final RobotState targetState;
@@ -74,7 +74,7 @@ public class SetStateCommand extends Command {
     private boolean elevatorCommanded = false;
     private boolean phase1Started = false;
 
-    public SetStateCommand(StateManager stateManager, ElevatorSubsystem elevator, ArmSubsystem arm,
+    public SetStateCommand(MainStateMachine stateManager, ElevatorSubsystem elevator, ArmSubsystem arm,
             RobotState targetState) {
         this.stateManager = stateManager;
         this.elevator = elevator;

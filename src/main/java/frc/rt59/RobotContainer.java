@@ -11,8 +11,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.rt59.Constants.DriverControlConstants;
 import frc.rt59.commands.SetStateCommand;
-import frc.rt59.statemachine.StateManager;
-import frc.rt59.statemachine.StateManager.RobotState;
+import frc.rt59.statemachine.FloorIntakeStateMachine;
+import frc.rt59.statemachine.MainStateMachine;
+import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ArmSubsystem;
 import frc.rt59.subsystems.ElevatorSubsystem;
 import frc.rt59.subsystems.EndEffectorSubsystem;
@@ -47,7 +48,10 @@ public class RobotContainer {
     private final FloorIntakeSubsystem m_floorintake = new FloorIntakeSubsystem();
     private final IndexerSubsystem m_indexer = new IndexerSubsystem();
     private final EndEffectorSubsystem m_endeffector = new EndEffectorSubsystem();
-    private final StateManager m_statemanager = new StateManager(m_elevator, m_arm, m_indexer, m_endeffector);
+    private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector);
+    private final FloorIntakeStateMachine m_floorintakestatemanager = new FloorIntakeStateMachine(m_floorintake, m_indexer);
+
+    private final RobotVisualizer m_visualizer = new RobotVisualizer(m_elevator, m_arm, drivebase::getPose);
 
     // private final SetStateCommand m_statemachine = new
     // SetStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
@@ -68,6 +72,8 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+
+        
         // Configure bindings
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
