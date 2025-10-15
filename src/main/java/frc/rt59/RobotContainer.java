@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.rt59.Constants.DriverControlConstants;
-import frc.rt59.commands.SetStateCommand;
-import frc.rt59.statemachine.FloorIntakeStateMachine;
+import frc.rt59.commands.SetMainStateCommand;
+import frc.rt59.statemachine.IntakeStateMachine;
 import frc.rt59.statemachine.MainStateMachine;
 import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ArmSubsystem;
@@ -49,12 +49,12 @@ public class RobotContainer {
     private final IndexerSubsystem m_indexer = new IndexerSubsystem();
     private final EndEffectorSubsystem m_endeffector = new EndEffectorSubsystem();
     private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector);
-    private final FloorIntakeStateMachine m_floorintakestatemanager = new FloorIntakeStateMachine(m_floorintake, m_indexer);
+    private final IntakeStateMachine m_intakestatemanager = new IntakeStateMachine(m_floorintake, m_indexer,m_endeffector);
 
     private final RobotVisualizer m_visualizer = new RobotVisualizer(m_elevator, m_arm, drivebase::getPose);
 
-    // private final SetStateCommand m_statemachine = new
-    // SetStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
+    // private final SetMainStateCommand m_statemachine = new
+    // SetMainStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
 
     /**
      * Drive Code
@@ -105,14 +105,14 @@ public class RobotContainer {
         // driverXbox.y().onTrue(m_arm.setArmAngleCommand(270, ArmDirections.NEAREST));
 
         // driverXbox.povUp().onTrue(m_elevator.setElevatorPosCommand(20));
-        driverXbox.povDown().onTrue(m_elevator.setElevatorPosCommand(0));
-        driverXbox.povLeft().onTrue(m_elevator.setElevatorPosCommand(10));
-        driverXbox.povRight().onTrue(m_elevator.setElevatorPosCommand(16));
+        // driverXbox.povDown().onTrue(m_elevator.setElevatorPosCommand(0));
+        // driverXbox.povLeft().onTrue(m_elevator.setElevatorPosCommand(10));
+        // driverXbox.povRight().onTrue(m_elevator.setElevatorPosCommand(16));
 
-        driverXbox.a().onTrue(new SetStateCommand(m_statemanager, m_elevator, m_arm, RobotState.STOW));
-        driverXbox.b().onTrue(new SetStateCommand(m_statemanager, m_elevator, m_arm, RobotState.L3));
-        driverXbox.x().onTrue(new SetStateCommand(m_statemanager, m_elevator, m_arm, RobotState.L2));
-        driverXbox.y().onTrue(new SetStateCommand(m_statemanager, m_elevator, m_arm, RobotState.L4));
+        driverXbox.a().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW));
+        driverXbox.b().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
+        driverXbox.x().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
+        driverXbox.y().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
     }
 
     /*

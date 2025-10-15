@@ -95,6 +95,10 @@ public final class Constants {
 
         // Sensor Settings
         public static final double CORAL_DETECTION_THRESHOLD = 0.06;
+
+        // Powers
+        public static final double PLUCK_POWER = 0.4;
+        public static final double IDLE_WITH_CORAL = 0.05;
     }
 
     public static final class floorIntakeConstants {

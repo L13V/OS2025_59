@@ -7,9 +7,10 @@ import frc.rt59.statemachine.MainStateMachine;
 import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ElevatorSubsystem;
 import frc.rt59.subsystems.ArmSubsystem;
+import frc.rt59.subsystems.EndEffectorSubsystem;
 import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
 
-public class SetStateCommand extends Command {
+public class SetMainStateCommand extends Command {
     /*
      * OBSTACLES
      */
@@ -56,6 +57,7 @@ public class SetStateCommand extends Command {
     private final MainStateMachine stateManager;
     private final ElevatorSubsystem elevator;
     private final ArmSubsystem arm;
+    private final EndEffectorSubsystem endeffector;
     private final RobotState targetState;
 
     // Direction-specific elevator thresholds
@@ -74,14 +76,15 @@ public class SetStateCommand extends Command {
     private boolean elevatorCommanded = false;
     private boolean phase1Started = false;
 
-    public SetStateCommand(MainStateMachine stateManager, ElevatorSubsystem elevator, ArmSubsystem arm,
+    public SetMainStateCommand(MainStateMachine stateManager, ElevatorSubsystem elevator, ArmSubsystem arm, EndEffectorSubsystem endeffector,
             RobotState targetState) {
         this.stateManager = stateManager;
         this.elevator = elevator;
         this.arm = arm;
+        this.endeffector = endeffector;
         this.targetState = targetState;
 
-        addRequirements(elevator, arm);
+        addRequirements(elevator, arm,endeffector);
     }
 
     @Override
@@ -105,6 +108,8 @@ public class SetStateCommand extends Command {
         // Figure out threshold based on target and inital arm angles
         threshold = computeSafeThreshold(initalAbsArmAngle, targetArmPos);
 
+        endeffector.setPower(targetState.endEffectorPower); // Set Power once (So overrides work!!!)
+
     }
 
     @Override
@@ -116,7 +121,6 @@ public class SetStateCommand extends Command {
         boolean startAboveThreshold = currentElevatorPos >= threshold;
         boolean targetAboveThreshold = targetElevatorPos >= threshold;
         boolean armAtSafeAngle = Math.abs(currentArmPos - SAFE_ARM_ANGLE) < 3.0;
-
         // --- CASE 1: Inherently safe (both above threshold) ---
         if (startAboveThreshold && targetAboveThreshold) {
             if (!elevatorCommanded) {

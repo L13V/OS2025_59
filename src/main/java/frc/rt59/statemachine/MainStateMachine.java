@@ -4,35 +4,38 @@ package frc.rt59.statemachine;
 import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.rt59.commands.SetStateCommand;
+import frc.rt59.commands.SetMainStateCommand;
 import frc.rt59.subsystems.ArmSubsystem;
 import frc.rt59.subsystems.ElevatorSubsystem;
 import frc.rt59.subsystems.EndEffectorSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
 import frc.rt59.subsystems.ArmSubsystem.ArmDirections;
+import frc.rt59.Constants.endEffectorConstants;
 
 public class MainStateMachine extends SubsystemBase {
 
     // Enum that defines all possible robot states
     public enum RobotState {
-        PLUCK(0, 90.0, ArmDirections.NEAREST),
-        STARTING(0, 90.0, ArmDirections.NEAREST),
-        STOW(5, 90.0, ArmDirections.NEAREST),
-        L1(0, 90.0, ArmDirections.NEAREST),
-        L2(15.0, 30.0, ArmDirections.NEAREST),
-        L3(17.5, 200, ArmDirections.NEAREST),
-        L4(15, 270, ArmDirections.NEAREST);
+        PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
+        STARTING(0, 90.0, ArmDirections.NEAREST, 0),
+        STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L1(0, 90.0, ArmDirections.NEAREST,endEffectorConstants.IDLE_WITH_CORAL),
+        L2(15.0, 30.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L3(17.5, 200, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L4(15, 270, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL);
 
         // Each state stores its own parameters
         public final double targetElevatorHeight;
         public final double targetArmAngle;
         public final ArmDirections armDirection;
+        public final double endEffectorPower;
 
         // Constructor to set values for each state
-        RobotState(double elevatorHeight, double armAngle, ArmDirections armDirection) {
+        RobotState(double elevatorHeight, double armAngle, ArmDirections armDirection, double endEffectorPower) {
             this.targetElevatorHeight = elevatorHeight;
             this.targetArmAngle = armAngle;
             this.armDirection = armDirection;
+            this.endEffectorPower = endEffectorPower;
         }
     }
 
@@ -86,34 +89,23 @@ public class MainStateMachine extends SubsystemBase {
     public void periodic() {
         // On first enable, stow robot
         if (currentState == RobotState.STARTING && targetState != RobotState.STOW) {
-            new SetStateCommand(this, elevator, arm, RobotState.STOW).schedule();
+            new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.STOW).schedule();
         }
         // Check for coral in order to pluck
         if ((currentState == RobotState.STOW) && indexer.hasCoral() && !endeffector.hasCoral()
                 && targetState != RobotState.PLUCK) {
-            new SetStateCommand(this, elevator, arm, RobotState.PLUCK).schedule();
+            new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.PLUCK).schedule();
         }
         // Check for endeffector coral after pluck
         if ((currentState == RobotState.PLUCK) && endeffector.hasCoral()
                 && targetState != RobotState.STOW) {
-            new SetStateCommand(this, elevator, arm, RobotState.STOW).schedule();
+            new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.STOW).schedule();
         }
+        currentStatePub.set(currentState.toString());
+        targetStatePub.set(targetState.toString());
 
-        switch (targetState) {
-            case STOW -> {
-                indexer.setRpm(-5000);
-                endeffector.setPower(0.05);
-            }
-            case PLUCK -> {
-                indexer.stop();
-                endeffector.setPower(0.4);
-            }
-            default -> {
 
-            }
-        }
-        currentStatePub.set(currentState.name());
-        targetStatePub.set(targetState.name());
+
 
     }
 }
