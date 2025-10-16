@@ -4,7 +4,6 @@
 
 package frc.rt59;
 
-import java.sql.Driver;
 
 import org.littletonrobotics.junction.LoggedRobot;
 

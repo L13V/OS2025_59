@@ -19,10 +19,6 @@ public class SetIntakeStateCommand extends Command {
     private final IndexerSubsystem indexer;
     private final IntakeState targetState;
 
-    // Cached target values
-    private double targetIntakePos;
-    private double targetIndexerRpm;
-
     public SetIntakeStateCommand(IntakeStateMachine intakeStateMachine, FloorIntakeSubsystem floorintake, IndexerSubsystem indexer,
             IntakeState targetState) {
         this.intakeStateMachine = intakeStateMachine;
