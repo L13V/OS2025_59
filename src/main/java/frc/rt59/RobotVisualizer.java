@@ -30,7 +30,7 @@ public class RobotVisualizer extends SubsystemBase {
         Logger.recordOutput("Visualizer/RobotPose", robotPose);
 
         Pose3d elevatorPose = new Pose3d(0, 0, elevatorHeight, new Rotation3d());
-        Pose3d armPose = new Pose3d(0, 0, elevatorHeight, new Rotation3d(0, armAngle, 0));
+        Pose3d armPose = new Pose3d(0, 0.269 , elevatorHeight+0.97, new Rotation3d(0,armAngle*-1,0));
 
         Logger.recordOutput("Visualizer/ComponentPoses", new Pose3d[] { elevatorPose, armPose });
     }

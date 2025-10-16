@@ -21,18 +21,17 @@ public class IntakeStateMachine extends SubsystemBase {
      *            Angle for floor intake
      * @param nRollerPower
      *            Floor intake roller power
-     * @param cRollerPower
-     *            Floor intake roller power with coral
-     * @param nIndexerRpm
-     *            Indexer roller power
+     * @param cRollerPower Floor intake roller power with coral
+     * @param nIndexerRpm Indexer roller power
      * @param cIndexerRpm
      *            Indexer roller power with coral
      */
     public enum IntakeState {
         STARTING(90.0, 0.0, 0.0, 0.0, 0.0),
         STOW(90.0, 0.0, 0.0, 0.0, 0.0),
-        DOWN(10.0, 0.5, 0.1, 5000.0, 100.0),
-        DOWN_OUTTAKE(10.0, -0.5, -0.5, -1000, -1000);
+        DOWN(10.0, 0.7, 0.1, -5000.0, -100.0),
+        DOWN_DEAD(10.0,0,0,0,0),
+        DOWN_OUTTAKE(10.0, -0.5, -0.5, 1000, 1000);
 
         public final double angle;
         public final double nRollerPower;
@@ -95,11 +94,11 @@ public class IntakeStateMachine extends SubsystemBase {
 
         if (targetState != IntakeState.DOWN_OUTTAKE && currentState != IntakeState.DOWN_OUTTAKE) {
             if (indexer.hasCoral() || endeffector.hasCoral()) {
-                // indexer.setRpm(targetState.cIndexerRpm); TODO: ANGLES
-                // floorintake.setWheelPower(targetState.cRollerPower);
+                indexer.setRpm(targetState.cIndexerRpm);
+                floorintake.setWheelPower(targetState.cRollerPower);
             } else {
-                // indexer.setRpm(targetState.nIndexerRpm);
-                // floorintake.setWheelPower(targetState.nRollerPower);
+                indexer.setRpm(targetState.nIndexerRpm);
+                floorintake.setWheelPower(targetState.nRollerPower);
             }
         }
 
