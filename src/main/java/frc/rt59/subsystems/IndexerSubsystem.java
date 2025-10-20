@@ -83,6 +83,12 @@ public class IndexerSubsystem extends SubsystemBase {
         rightClosedLoopController.setReference(rpm,ControlType.kVelocity);
     }
 
+    public void setVoltage(double voltage) {
+        leftIndexerMotor.setVoltage(voltage);
+        rightIndexerMotor.setVoltage(-voltage);
+
+    }
+
     public void stop() {
         leftIndexerMotor.stopMotor();
         rightIndexerMotor.stopMotor();

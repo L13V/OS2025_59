@@ -18,20 +18,20 @@ public class MainStateMachine extends SubsystemBase {
     public enum RobotState {
         STARTING(0, 90.0, ArmDirections.NEAREST, 0),
         STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
+        PLUCK(0, 91.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
         MANUAL_PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
         // L1
-        L1(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        L1_SCORE(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L1(8, 139.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L1_SCORE(8, 139.0, ArmDirections.NEAREST, -0.32),
         // L2
-        L2(15.0, 30.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        L2_SCORE(15.0, 30.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L2(16.5, 111.5, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L2_SCORE(16.5, 137.0, ArmDirections.NEAREST, -0.2),
         // L3
-        L3(17.5, 200, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        L3_SCORE(17.5, 200, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L3(1, 214, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L3_SCORE(1, 194, ArmDirections.NEAREST, -0.1),
         // L4
-        L4(15, 270, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        L4_SCORE(15, 270, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL);
+        L4(26, 214.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        L4_SCORE(26, 191.0, ArmDirections.NEAREST, -0.15);
 
         // Each state stores its own parameters
         public final double targetElevatorHeight;
@@ -128,7 +128,7 @@ public class MainStateMachine extends SubsystemBase {
             new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.PLUCK).schedule();
         }
         // Check for endeffector coral after pluck
-        if ((currentState == RobotState.PLUCK) && endeffector.hasCoral()
+        if (((currentState == RobotState.PLUCK)|| targetState == RobotState.PLUCK) && endeffector.hasCoral()
                 && targetState != RobotState.STOW) {
             new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.STOW).schedule();
         }
@@ -138,11 +138,11 @@ public class MainStateMachine extends SubsystemBase {
     }
 
     public void setToScoreState() {
-        new SetMainStateCommand(this, elevator, arm, endeffector, targetState.getScoringState());
+        new SetMainStateCommand(this, elevator, arm, endeffector, getTargetState().getScoringState()).schedule();
     }
 
     public void setToUnscoreState() {
-        new SetMainStateCommand(this, elevator, arm, endeffector, targetState.getUnscoringState());
+        new SetMainStateCommand(this, elevator, arm, endeffector, getTargetState().getUnscoringState()).schedule();
     }
 
     public void setEject(boolean eject) {

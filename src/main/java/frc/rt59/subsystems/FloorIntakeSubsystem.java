@@ -35,8 +35,8 @@ public class FloorIntakeSubsystem extends SubsystemBase {
     /*
      * Debugging/Testing
      */
-    final LoggedNetworkNumber intakePosPub = new LoggedNetworkNumber("Floor Intake/Position (in)");
-    final LoggedNetworkNumber intakeTargetPub = new LoggedNetworkNumber("Floor Intake/Target (in)");
+    final LoggedNetworkNumber intakePosPub = new LoggedNetworkNumber("Floor Intake/Position (deg)");
+    final LoggedNetworkNumber intakeTargetPub = new LoggedNetworkNumber("Floor Intake/Target (deg)");
     final LoggedNetworkNumber intakeVelocityPub = new LoggedNetworkNumber("Floor Intake/Velocity (rpm)");
     final LoggedNetworkNumber intakeVoltagePub = new LoggedNetworkNumber("Floor Intake/Voltage (V)");
     final LoggedNetworkNumber intakeCurrentPub = new LoggedNetworkNumber("Floor Intake/Current (A)");
@@ -50,7 +50,7 @@ public class FloorIntakeSubsystem extends SubsystemBase {
          * Floor Intake Pivot Config
          */
         // Basic Params
-        floorIntakePivotConfig.idleMode(IdleMode.kBrake);
+        floorIntakePivotConfig.idleMode(IdleMode.kCoast);
         floorIntakePivotConfig.inverted(floorIntakeConstants.FLOOR_INTAKE_PIVOT_INVERTED);
         floorIntakePivotConfig.smartCurrentLimit(floorIntakeConstants.FLOOR_INTAKE_PIVOT_CURRENT_LIMIT);
         // Limits
@@ -61,7 +61,9 @@ public class FloorIntakeSubsystem extends SubsystemBase {
         // PID
         floorIntakePivotConfig.closedLoop.pid(floorIntakeConstants.FLOOR_INTAKE_PIVOT_P, floorIntakeConstants.FLOOR_INTAKE_PIVOT_I,
                 floorIntakeConstants.FLOOR_INTAKE_PIVOT_D);
-        floorIntakePivotConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+        floorIntakePivotConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+        floorIntakePivotConfig.absoluteEncoder.positionConversionFactor(180);
+        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.592244029045105);
         floorIntakePivotMotor.configure(floorIntakePivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         /*
@@ -106,6 +108,7 @@ public class FloorIntakeSubsystem extends SubsystemBase {
     public void setWheelPower(double power) {
         floorIntakeWheelsMotor.set(power);
     }
+
     public void stopWheels() {
         floorIntakeWheelsMotor.stopMotor();
     }
@@ -119,11 +122,11 @@ public class FloorIntakeSubsystem extends SubsystemBase {
     }
 
     public double getPivotAngle() {
-        return floorIntakePivotMotor.getEncoder().getPosition();
+        return floorIntakePivotMotor.getAbsoluteEncoder().getPosition();
     }
 
     public double getPivotVelocity() {
-        return floorIntakePivotMotor.getEncoder().getVelocity();
+        return floorIntakePivotMotor.getAbsoluteEncoder().getVelocity();
     }
 
     public double getPivotVoltage() {
@@ -139,12 +142,13 @@ public class FloorIntakeSubsystem extends SubsystemBase {
     }
 
     public boolean onPivotTarget() {
-        return floorIntakePivotMotor.getEncoder().getPosition() == intakePivotTargetAngle;
+        return floorIntakePivotMotor.getAbsoluteEncoder().getPosition() == intakePivotTargetAngle;
     }
 
     public boolean atPivotPosition(double test) {
         return (Math.abs(intakePivotTargetAngle - getPivotAngle()) <= floorIntakeConstants.FLOOR_INTAKE_PIVOT_TOLLERANCE);
     }
+
     // Wheels
     public double getWheelMotorVelocity() {
         return floorIntakeWheelsMotor.getEncoder().getVelocity();
@@ -162,7 +166,11 @@ public class FloorIntakeSubsystem extends SubsystemBase {
         return floorIntakeWheelsMotor.getMotorTemperature();
     }
 
-    /* 
+    public double getPivotSetpoint() {
+        return intakePivotTargetAngle;
+    }
+
+    /*
      * Commands
      */
 

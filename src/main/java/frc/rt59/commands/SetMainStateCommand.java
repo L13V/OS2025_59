@@ -84,7 +84,7 @@ public class SetMainStateCommand extends Command {
         this.endeffector = endeffector;
         this.targetState = targetState;
 
-        addRequirements(elevator, arm,endeffector);
+        addRequirements(elevator, arm, endeffector);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class SetMainStateCommand extends Command {
 
         boolean startAboveThreshold = currentElevatorPos >= threshold;
         boolean targetAboveThreshold = targetElevatorPos >= threshold;
-        boolean armAtSafeAngle = Math.abs(currentArmPos - SAFE_ARM_ANGLE) < 3.0;
+        boolean armAtSafeAngle = Math.abs(currentArmPos - SAFE_ARM_ANGLE) < 1.0;
         // --- CASE 1: Inherently safe (both above threshold) ---
         if (startAboveThreshold && targetAboveThreshold) {
             if (!elevatorCommanded) {
@@ -148,23 +148,32 @@ public class SetMainStateCommand extends Command {
 
         // --- CASE 3: Moving elevator down below threshold ---
         if (!targetAboveThreshold) {
-            // Step 0: Pass Threshold
-            if (!phase1Started && !armAtSafeAngle && !armCommanded && !startAboveThreshold) {
-                elevator.setElevatorPos(threshold);
-                phase1Started = true;
-            } else if (!phase1Started && !armAtSafeAngle && startAboveThreshold && !armCommanded) {
+
+            // Step 1: Always ensure elevator clears obstacles first
+            if (!phase1Started) {
+                // If we're going to pass through an obstacle, move elevator up to the threshold
+                // first
+                if (startAboveThreshold && currentElevatorPos < threshold) {
+                    elevator.setElevatorPos(threshold);
+                } else if (!startAboveThreshold) {
+                    elevator.setElevatorPos(threshold);
+                }
                 phase1Started = true;
             }
-            if (startAboveThreshold && phase1Started) {
-                if (!armCommanded) {
-                    arm.setArmAngle(targetArmPos, armDirection);
-                    armCommanded = true;
-                } else if (!elevatorCommanded && arm.atPosition(targetArmPos)) {
-                    elevator.setElevatorPos(targetElevatorPos);
-                    elevatorCommanded = true;
-                }
+
+            // Step 2: Once safe height reached, move arm to target
+            if (!armCommanded && currentElevatorPos >= threshold - 0.1) {
+                arm.setArmAngle(targetArmPos, armDirection);
+                armCommanded = true;
+            }
+
+            // Step 3: After arm reaches target, lower elevator
+            if (arm.atPosition(targetArmPos) && !elevatorCommanded) {
+                elevator.setElevatorPos(targetElevatorPos);
+                elevatorCommanded = true;
             }
         }
+
     }
 
     @Override

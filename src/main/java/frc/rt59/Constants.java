@@ -81,7 +81,7 @@ public final class Constants {
         public static final double INDEXER_CORAL_THRESHOLD = 0.07;
 
         public static final boolean INDEXER_BRAKE = false;
-        public static final int INDEXER_CURRENT_LIMIT = 80;
+        public static final int INDEXER_CURRENT_LIMIT = 200;
 
         public static final double INDEXER_P = 0.000115;
         public static final double INDEXER_I = 0.000001;
@@ -94,30 +94,37 @@ public final class Constants {
         public static final int CANRANGE_CAN_ID = 56;
 
         // Sensor Settings
-        public static final double CORAL_DETECTION_THRESHOLD = 0.06;
+        public static final double CORAL_DETECTION_THRESHOLD = 0.067;
 
         // Powers
-        public static final double PLUCK_POWER = 0.4;
+        public static final double PLUCK_POWER = 0.45;
         public static final double IDLE_WITH_CORAL = 0.05;
+
     }
 
     public static final class floorIntakeConstants {
         public static final int FLOOR_INTAKE_PIVOT_CAN_ID = 57;
 
         public static final int FLOOR_INTAKE_PIVOT_CURRENT_LIMIT = 80;
-        public static final boolean FLOOR_INTAKE_PIVOT_INVERTED = false;
+        public static final boolean FLOOR_INTAKE_PIVOT_INVERTED = true;
         public static final double FLOOR_INTAKE_PIVOT_TOLLERANCE = 1; // degree
-        public static final double PIVOT_FW_LIMIT = 90.0; // TODO: FIX
-        public static final double PIVOT_REVERSE_LIMIT = 0.0; // TODO: FIX
+        public static final double PIVOT_FW_LIMIT = 135.0; // TODO: FIX
+        public static final double PIVOT_REVERSE_LIMIT = 20.0; // TODO: FIX
 
-        public static final double FLOOR_INTAKE_PIVOT_P = 0; // TODO: FIX
-        public static final double FLOOR_INTAKE_PIVOT_I = 0; // TODO: FIX
+        public static final double FLOOR_INTAKE_PIVOT_P = 0.007400000002235174; // TODO: FIX
+        // public static final double FLOOR_INTAKE_PIVOT_I = 0.000004999999873689376; // TODO: FIX
+        public static final double FLOOR_INTAKE_PIVOT_I = 0.0000015999999873689376; // TODO: FIX
         public static final double FLOOR_INTAKE_PIVOT_D = 0; // TODO: FIX
         public static final double FLOOR_INTAKE_PIVOT_F = 0; // TODO: FIX
 
         public static final int FLOOR_INTAKE_WHEELS_CAN_ID = 58;
         public static final int FLOOR_INTAKE_WHEELS_CURRENT_LIMIT = 80;
         public static final boolean FLOOR_INTAKE_WHEELS_INVERTED = false;
+
+        public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MIN = 19; // degree
+        public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MAX = 25; // degree
+
+
 
     }
 }

@@ -32,9 +32,9 @@ public class SetIntakeStateCommand extends Command {
     public void initialize() {
         // Runs when command starts
         intakeStateMachine.setTargetState(targetState);
-        // floorintake.setPivotAngle(targetState.angle);
+        floorintake.setPivotAngle(targetState.angle);
         floorintake.setWheelPower(targetState.nRollerPower);
-        indexer.setRpm(targetState.nIndexerRpm);
+        indexer.setPower(targetState.nIndexerPower);
     }
 
     @Override

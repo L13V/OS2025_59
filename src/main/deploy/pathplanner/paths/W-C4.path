@@ -1,0 +1,109 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.161757385163265,
+        "y": 6.677664266400277
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.392020543058002,
+        "y": 6.773881371663435
+      },
+      "isLocked": false,
+      "linkedName": "Wall"
+    },
+    {
+      "anchor": {
+        "x": 3.515131578947368,
+        "y": 6.250822368421052
+      },
+      "prevControl": {
+        "x": 4.135063970230224,
+        "y": 6.752238273135125
+      },
+      "nextControl": {
+        "x": 3.0789473684210527,
+        "y": 5.898026315789474
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.5994333350805605,
+        "y": 5.238838400569034
+      },
+      "prevControl": {
+        "x": 3.3859584276307264,
+        "y": 5.484058428191685
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "C4"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.6201651455888784,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 0.5,
+        "maxAcceleration": 0.5,
+        "maxAngularVelocity": 300.0,
+        "maxAngularAcceleration": 400.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8622338113863568,
+      "maxWaypointRelativePos": 1.4793568013906924,
+      "constraints": {
+        "maxVelocity": 0.5,
+        "maxAcceleration": 0.5,
+        "maxAngularVelocity": 200.0,
+        "maxAngularAcceleration": 300.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "L4",
+      "waypointRelativePos": 1.103867883528901,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "L4"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -59.99999999999999
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -140.91437931590949
+  },
+  "useDefaultConstraints": false
+}

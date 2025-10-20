@@ -62,7 +62,6 @@ public class RobotContainer {
     private final RobotVisualizer m_visualizer = new RobotVisualizer(m_elevator, m_arm, drivebase::getPose);
     private final CandleSubsystem m_leds = new CandleSubsystem();
 
-
     // private final SetMainStateCommand m_statemachine = new
     // SetMainStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
 
@@ -89,15 +88,26 @@ public class RobotContainer {
         /*
          * PathPlanner Commands
          */
+        // L1
         NamedCommands.registerCommand("L1", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1));
+        NamedCommands.registerCommand("L1_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1_SCORE));
+        // L2
         NamedCommands.registerCommand("L2", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
+        NamedCommands.registerCommand("L2_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2_SCORE));
+        // L3
         NamedCommands.registerCommand("L3", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
+        NamedCommands.registerCommand("L3_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3_SCORE));
+        // L4
         NamedCommands.registerCommand("L4", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
-        NamedCommands.registerCommand("STOW", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW));
+        NamedCommands.registerCommand("L4_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4_SCORE));
+        // Stow
+        NamedCommands.registerCommand("Stow_Robot", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW));
+        // Floor Intake
+        NamedCommands.registerCommand("Floor_Intake", new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
+        NamedCommands.registerCommand("Stow_Intake", new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
 
-        NamedCommands.registerCommand("FLOOR_INTAKE", new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
-        NamedCommands.registerCommand("STOW_INTAKE", new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
-
+        // Wait For Coral
+        NamedCommands.registerCommand("Wait_For_Coral", Commands.waitUntil(m_endeffector::hasCoral).withName("WaitForCoral"));
     }
 
     /**
@@ -155,7 +165,8 @@ public class RobotContainer {
         driverXbox.b().onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
         // Scoring
         driverXbox.rightTrigger().onTrue(new InstantCommand(() -> m_statemanager.setToScoreState()));
-        driverXbox.leftTrigger().onTrue(new InstantCommand(() -> m_statemanager.setToUnscoreState()));
+        // driverXbox.rightTrigger().onFalse(new InstantCommand(() ->
+        // m_statemanager.setToUnscoreState()));
         operatorXbox.b().onTrue(new InstantCommand(() -> m_statemanager.setToScoreState()));
         operatorXbox.y().onTrue(new InstantCommand(() -> m_statemanager.setToUnscoreState()));
         // Eject
@@ -184,7 +195,7 @@ public class RobotContainer {
                                 // then go back to STOW
                                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW)));
 
-                                // the lion does not concern itself with comments
+        // the lion does not concern itself with comments
 
     }
 
@@ -192,7 +203,7 @@ public class RobotContainer {
      * Autonomous
      */
     public Command getAutonomousCommand() {
-        return drivebase.getAutonomousCommand("Forward");
+        return drivebase.getAutonomousCommand("PEBIS");
     }
 
     public void setMotorBrake(boolean brake) {

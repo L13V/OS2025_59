@@ -25,7 +25,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         POSITION,
         VELOCITY,
     }
-
     /*
      * Hardware
      */
