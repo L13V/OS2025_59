@@ -4,11 +4,13 @@
 
 package frc.rt59.statemachine;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
 import frc.rt59.Constants.floorIntakeConstants;
 import frc.rt59.commands.SetIntakeStateCommand;
-
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.subsystems.FloorIntakeSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
@@ -32,8 +34,8 @@ public class IntakeStateMachine extends SubsystemBase {
      */
     public enum IntakeState {
         STARTING(130, 0.0, 0.0, 0.0, 0.0),
-        STOW(130, 0.0, 0.0, 0.0, 0.0),
-        DOWN(23, 0.4, 0.1, -0.7, -0.05),
+        STOW(120, 0.0, 0.0, 0.0, 0.0),
+        DOWN(23, 0.7, 0.0, -1, 0.0),
         DOWN_DEAD(23, 0, 0, 0, 0),
         DOWN_OUTTAKE(23, -0.5, -0.5, 0.3, 0.3);
 
@@ -60,11 +62,13 @@ public class IntakeStateMachine extends SubsystemBase {
     private IntakeState currentState = IntakeState.STARTING;
     private IntakeState targetState = IntakeState.STARTING;
 
-    public boolean estopCommanded = false;
-    public boolean restartCommand = false;
+    public boolean intakeStopped = false;
 
     final LoggedNetworkString currentStatePub = new LoggedNetworkString("Floor Intake/Current State");
     final LoggedNetworkString targetStatePub = new LoggedNetworkString("Floor Intake/Target State");
+    final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean("Intake Disabled");
+    final LoggedNetworkNumber intakeSetpoint = new LoggedNetworkNumber("Intake Setpoint");
+    final LoggedNetworkNumber intakePosition = new LoggedNetworkNumber("Intake Position");
 
     public IntakeStateMachine(FloorIntakeSubsystem floorintake, IndexerSubsystem indexer,
             EndEffectorSubsystem endeffector) {
@@ -98,8 +102,8 @@ public class IntakeStateMachine extends SubsystemBase {
     }
 
     public void periodic() {
-        if (currentState == IntakeState.STARTING && targetState != IntakeState.STARTING) {
-            new SetIntakeStateCommand(this, floorintake, indexer, IntakeState.STOW);
+        if (currentState == IntakeState.STARTING && targetState != IntakeState.STOW) {
+            new SetIntakeStateCommand(this, floorintake, indexer, IntakeState.STOW).schedule();
         }
 
         if (targetState != IntakeState.DOWN_OUTTAKE && currentState != IntakeState.DOWN_OUTTAKE) {
@@ -119,18 +123,36 @@ public class IntakeStateMachine extends SubsystemBase {
                 && floorintake.getPivotPIDTarget() <= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MAX
                 && floorintake.getPivotAngle() >= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MIN
                 && floorintake.getPivotAngle() <= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MAX
-                && !estopCommanded) {
+                && !intakeStopped) {
             floorintake.stopPivot();
-            estopCommanded = true;
+            floorintake.pivotCoast();
+            intakeStopped = true;
 
         }
-        if (floorintake.getPivotAngle() <= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MIN
-                || floorintake.getPivotAngle() >= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MAX
-                        && estopCommanded) {
-            estopCommanded = false;
+        if ((floorintake.getPivotAngle() <= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MIN
+                || floorintake.getPivotAngle() >= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MAX)
+                && (floorintake.getPivotPIDTarget() <= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MIN
+                        || floorintake.getPivotPIDTarget() >= floorIntakeConstants.FLOOR_INTAKE_PIVOT_DEADZONE_MAX)
+                && intakeStopped) {
+            intakeStopped = false;
+            floorintake.pivotBrake();
         }
+
         targetStatePub.set(targetState.toString());
         currentStatePub.set(currentState.toString());
+        intakeDisabled.set(intakeStopped);
+        intakeSetpoint.set(floorintake.getPivotPIDTarget());
+        intakePosition.set(floorintake.getPivotAngle());
 
+    }
+
+    public void initializeState() {
+        // Ensure mechanisms start in a known safe position
+        currentState = IntakeState.STOW;
+        targetState = IntakeState.STOW;
+
+        floorintake.setPivotAngle(IntakeState.STOW.angle);
+        floorintake.setWheelPower(IntakeState.STOW.nRollerPower);
+        indexer.setPower(IntakeState.STOW.nIndexerPower);
     }
 }

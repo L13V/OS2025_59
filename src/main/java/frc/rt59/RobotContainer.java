@@ -25,8 +25,10 @@ import frc.rt59.subsystems.FloorIntakeSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
 import frc.rt59.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import frc.rt59.statemachine.Pluck;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.reduxrobotics.sensors.canandcolor.DigoutChannel.Index;
 
 import swervelib.SwerveInputStream;
 
@@ -40,6 +42,8 @@ import swervelib.SwerveInputStream;
  */
 @SuppressWarnings("unused")
 public class RobotContainer {
+
+    boolean startupScheduled = false;
     /*
      * Controllers
      */
@@ -57,10 +61,13 @@ public class RobotContainer {
     private final IndexerSubsystem m_indexer = new IndexerSubsystem();
     private final EndEffectorSubsystem m_endeffector = new EndEffectorSubsystem();
     private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector);
-    private final IntakeStateMachine m_intakestatemanager = new IntakeStateMachine(m_floorintake, m_indexer, m_endeffector);
+    private final IntakeStateMachine m_intakestatemanager = new IntakeStateMachine(m_floorintake, m_indexer,
+            m_endeffector);
 
     private final RobotVisualizer m_visualizer = new RobotVisualizer(m_elevator, m_arm, drivebase::getPose);
     private final CandleSubsystem m_leds = new CandleSubsystem();
+
+    private final Pluck m_pluck = new Pluck(m_statemanager, m_elevator, m_arm, m_indexer, m_endeffector);
 
     // private final SetMainStateCommand m_statemachine = new
     // SetMainStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
@@ -81,33 +88,49 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-
+        // new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+        // RobotState.CORAL_STOW).schedule();
+        // new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer,
+        // IntakeState.STOW).schedule();
         // Configure bindings
+
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
         /*
          * PathPlanner Commands
          */
         // L1
-        NamedCommands.registerCommand("L1", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1));
-        NamedCommands.registerCommand("L1_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1_SCORE));
+        NamedCommands.registerCommand("L1",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1));
+        NamedCommands.registerCommand("L1_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1_SCORE));
         // L2
-        NamedCommands.registerCommand("L2", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
-        NamedCommands.registerCommand("L2_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2_SCORE));
+        NamedCommands.registerCommand("L2",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
+        NamedCommands.registerCommand("L2_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2_SCORE));
         // L3
-        NamedCommands.registerCommand("L3", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
-        NamedCommands.registerCommand("L3_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3_SCORE));
+        NamedCommands.registerCommand("L3",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
+        NamedCommands.registerCommand("L3_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3_SCORE));
         // L4
-        NamedCommands.registerCommand("L4", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
-        NamedCommands.registerCommand("L4_Score", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4_SCORE));
+        NamedCommands.registerCommand("L4",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
+        NamedCommands.registerCommand("L4_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4_SCORE));
         // Stow
-        NamedCommands.registerCommand("Stow_Robot", new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW));
+        NamedCommands.registerCommand("Stow_Robot",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.CORAL_STOW));
         // Floor Intake
-        NamedCommands.registerCommand("Floor_Intake", new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
-        NamedCommands.registerCommand("Stow_Intake", new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
+        NamedCommands.registerCommand("Floor_Intake",
+                new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
+        NamedCommands.registerCommand("Stow_Intake",
+                new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
 
         // Wait For Coral
-        NamedCommands.registerCommand("Wait_For_Coral", Commands.waitUntil(m_endeffector::hasCoral).withName("WaitForCoral"));
+        NamedCommands.registerCommand("Wait_For_Coral",
+                Commands.waitUntil(m_endeffector::hasCoral).withName("Wait_For_Coral"));
     }
 
     /**
@@ -126,43 +149,20 @@ public class RobotContainer {
          */
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverXbox.back().whileTrue(drivebase.centerModulesCommand());
-
-        /*
-         * Old testing controls
-         */
-        // driverXbox.a().onTrue(new SetMainStateCommand(m_statemanager, m_elevator,
-        // m_arm, m_endeffector, RobotState.STOW));
-        // driverXbox.b().onTrue(new SetMainStateCommand(m_statemanager, m_elevator,
-        // m_arm, m_endeffector, RobotState.L3));
-        // driverXbox.x().onTrue(new SetMainStateCommand(m_statemanager, m_elevator,
-        // m_arm, m_endeffector, RobotState.L2));
-        // driverXbox.y().onTrue(new SetMainStateCommand(m_statemanager, m_elevator,
-        // m_arm, m_endeffector, RobotState.L4));
-
-        // driverXbox.leftBumper().onTrue(new
-        // SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer,
-        // IntakeState.DOWN));
-        // driverXbox.leftBumper().onFalse(new
-        // SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer,
-        // IntakeState.DOWN_DEAD));
-
-        // driverXbox.rightBumper().onTrue(new
-        // SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer,
-        // IntakeState.DOWN_OUTTAKE));
-        // driverXbox.rightBumper().onFalse(new
-        // SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer,
-        // IntakeState.DOWN_DEAD));
-
         /*
          * Floor Intake
          */
         // Floor Intake Down (Intaking)
-        driverXbox.leftBumper().onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
+        driverXbox.leftBumper()
+                .onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
         // Floor Intake Down (Outtaking)
-        driverXbox.rightBumper().onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN_OUTTAKE));
-        driverXbox.rightBumper().onFalse(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
+        driverXbox.rightBumper().onTrue(
+                new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN_OUTTAKE));
+        driverXbox.rightBumper()
+                .onFalse(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
         // Floor Intake Stow
-        driverXbox.b().onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
+        driverXbox.b()
+                .onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
         // Scoring
         driverXbox.rightTrigger().onTrue(new InstantCommand(() -> m_statemanager.setToScoreState()));
         // driverXbox.rightTrigger().onFalse(new InstantCommand(() ->
@@ -176,24 +176,31 @@ public class RobotContainer {
         operatorXbox.a().onTrue(new InstantCommand(() -> m_statemanager.setEject(true)));
         operatorXbox.a().onFalse(new InstantCommand(() -> m_statemanager.setEject(false)));
         // Stow
-        operatorXbox.start().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW));
+        operatorXbox.start().onTrue(
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.CORAL_STOW));
 
         // Levels
-        operatorXbox.leftBumper().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1));
-        operatorXbox.leftTrigger().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
-        operatorXbox.rightBumper().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
-        operatorXbox.rightTrigger().onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
+        operatorXbox.leftBumper()
+                .onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1));
+        operatorXbox.leftTrigger()
+                .onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
+        operatorXbox.rightBumper()
+                .onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
+        operatorXbox.rightTrigger()
+                .onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
 
         operatorXbox.back()
-                .and(() -> m_statemanager.getCurrentState() == RobotState.STOW)
+                .and(() -> m_statemanager.getCurrentState() == RobotState.CORAL_STOW)
                 .onTrue(
                         Commands.sequence(
                                 // go to MANUAL_PLUCK
-                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.MANUAL_PLUCK),
+                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+                                        RobotState.MANUAL_PLUCK),
                                 // wait 2 seconds
                                 Commands.waitSeconds(2),
                                 // then go back to STOW
-                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.STOW)));
+                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+                                        RobotState.CORAL_STOW)));
 
         // the lion does not concern itself with comments
 
@@ -203,10 +210,11 @@ public class RobotContainer {
      * Autonomous
      */
     public Command getAutonomousCommand() {
-        return drivebase.getAutonomousCommand("PEBIS");
+        return drivebase.getAutonomousCommand("W-L4-A4");
     }
 
     public void setMotorBrake(boolean brake) {
         drivebase.setMotorBrake(brake);
     }
+
 }

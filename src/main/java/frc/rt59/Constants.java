@@ -81,7 +81,7 @@ public final class Constants {
         public static final double INDEXER_CORAL_THRESHOLD = 0.07;
 
         public static final boolean INDEXER_BRAKE = false;
-        public static final int INDEXER_CURRENT_LIMIT = 200;
+        public static final int INDEXER_CURRENT_LIMIT = 600;
 
         public static final double INDEXER_P = 0.000115;
         public static final double INDEXER_I = 0.000001;
@@ -99,6 +99,9 @@ public final class Constants {
         // Powers
         public static final double PLUCK_POWER = 0.45;
         public static final double IDLE_WITH_CORAL = 0.05;
+        public static final double IDLE_WITH_BALL = 0.1;
+
+        public static final double INTAKE_BALL = 0.2;
 
     }
 
@@ -107,7 +110,7 @@ public final class Constants {
 
         public static final int FLOOR_INTAKE_PIVOT_CURRENT_LIMIT = 80;
         public static final boolean FLOOR_INTAKE_PIVOT_INVERTED = true;
-        public static final double FLOOR_INTAKE_PIVOT_TOLLERANCE = 1; // degree
+        public static final double FLOOR_INTAKE_PIVOT_TOLLERANCE = 15; // degree
         public static final double PIVOT_FW_LIMIT = 135.0; // TODO: FIX
         public static final double PIVOT_REVERSE_LIMIT = 20.0; // TODO: FIX
 
@@ -122,7 +125,7 @@ public final class Constants {
         public static final boolean FLOOR_INTAKE_WHEELS_INVERTED = false;
 
         public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MIN = 19; // degree
-        public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MAX = 25; // degree
+        public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MAX = 30; // degree
 
 
 

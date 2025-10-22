@@ -16,58 +16,50 @@
     },
     {
       "anchor": {
-        "x": 3.515131578947368,
-        "y": 6.250822368421052
+        "x": 3.8120771479399207,
+        "y": 6.237980522011299
       },
       "prevControl": {
-        "x": 4.135063970230224,
-        "y": 6.752238273135125
+        "x": 4.2784224242530655,
+        "y": 6.736188418051577
       },
       "nextControl": {
-        "x": 3.0789473684210527,
-        "y": 5.898026315789474
+        "x": 3.4318274815541865,
+        "y": 5.8317506406715225
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.5994333350805605,
-        "y": 5.238838400569034
+        "x": 3.568865038173852,
+        "y": 5.284063762727403
       },
       "prevControl": {
-        "x": 3.3859584276307264,
-        "y": 5.484058428191685
+        "x": 3.443865038173852,
+        "y": 5.500570113673512
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "C4"
+      "linkedName": "L4"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.04,
+      "rotationDegrees": -59.99999999999999
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.6201651455888784,
+      "minWaypointRelativePos": 0.9724349157733543,
       "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 0.5,
-        "maxAcceleration": 0.5,
-        "maxAngularVelocity": 300.0,
-        "maxAngularAcceleration": 400.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    },
-    {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.8622338113863568,
-      "maxWaypointRelativePos": 1.4793568013906924,
-      "constraints": {
-        "maxVelocity": 0.5,
-        "maxAcceleration": 0.5,
-        "maxAngularVelocity": 200.0,
-        "maxAngularAcceleration": 300.0,
+        "maxVelocity": 0.85,
+        "maxAcceleration": 0.8,
+        "maxAngularVelocity": 100.0,
+        "maxAngularAcceleration": 100.0,
         "nominalVoltage": 12.0,
         "unlimited": false
       }
@@ -77,8 +69,8 @@
   "eventMarkers": [
     {
       "name": "L4",
-      "waypointRelativePos": 1.103867883528901,
-      "endWaypointRelativePos": null,
+      "waypointRelativePos": 0.6814701378254224,
+      "endWaypointRelativePos": 2.0,
       "command": {
         "type": "named",
         "data": {
@@ -88,9 +80,9 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 1.0,
-    "maxAngularVelocity": 540.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 400.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false

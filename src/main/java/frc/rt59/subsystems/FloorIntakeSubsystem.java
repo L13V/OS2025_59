@@ -50,7 +50,7 @@ public class FloorIntakeSubsystem extends SubsystemBase {
          * Floor Intake Pivot Config
          */
         // Basic Params
-        floorIntakePivotConfig.idleMode(IdleMode.kCoast);
+        floorIntakePivotConfig.idleMode(IdleMode.kBrake);
         floorIntakePivotConfig.inverted(floorIntakeConstants.FLOOR_INTAKE_PIVOT_INVERTED);
         floorIntakePivotConfig.smartCurrentLimit(floorIntakeConstants.FLOOR_INTAKE_PIVOT_CURRENT_LIMIT);
         // Limits
@@ -63,7 +63,7 @@ public class FloorIntakeSubsystem extends SubsystemBase {
                 floorIntakeConstants.FLOOR_INTAKE_PIVOT_D);
         floorIntakePivotConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         floorIntakePivotConfig.absoluteEncoder.positionConversionFactor(180);
-        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.592244029045105);
+        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.1142067);
         floorIntakePivotMotor.configure(floorIntakePivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         /*
@@ -103,6 +103,13 @@ public class FloorIntakeSubsystem extends SubsystemBase {
 
     public void stopPivot() {
         floorIntakePivotMotor.stopMotor();
+    }
+
+    public void pivotCoast() {
+        floorIntakePivotMotor.configure(floorIntakePivotConfig.idleMode(IdleMode.kCoast), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+    public void pivotBrake() {
+        floorIntakePivotMotor.configure(floorIntakePivotConfig.idleMode(IdleMode.kBrake), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setWheelPower(double power) {

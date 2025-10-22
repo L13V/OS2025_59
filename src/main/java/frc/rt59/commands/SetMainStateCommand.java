@@ -2,7 +2,6 @@
 package frc.rt59.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.rt59.Constants.ArmConstants;
 import frc.rt59.statemachine.MainStateMachine;
 import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ElevatorSubsystem;
@@ -64,7 +63,6 @@ public class SetMainStateCommand extends Command {
     private static final double ELEVATOR_SAFE_THRESHOLD = 18;
 
     private double threshold = ELEVATOR_SAFE_THRESHOLD;
-    private static final double SAFE_ARM_ANGLE = ArmConstants.SAFE_ARM_ANGLE;
 
     // Cached target values
     private double targetElevatorPos;
@@ -76,7 +74,8 @@ public class SetMainStateCommand extends Command {
     private boolean elevatorCommanded = false;
     private boolean phase1Started = false;
 
-    public SetMainStateCommand(MainStateMachine stateManager, ElevatorSubsystem elevator, ArmSubsystem arm, EndEffectorSubsystem endeffector,
+    public SetMainStateCommand(MainStateMachine stateManager, ElevatorSubsystem elevator, ArmSubsystem arm,
+            EndEffectorSubsystem endeffector,
             RobotState targetState) {
         this.stateManager = stateManager;
         this.elevator = elevator;
@@ -87,7 +86,6 @@ public class SetMainStateCommand extends Command {
         addRequirements(elevator, arm, endeffector);
     }
 
-    @Override
     public void initialize() {
         // Runs when command starts
         stateManager.setTargetState(targetState);
@@ -112,15 +110,12 @@ public class SetMainStateCommand extends Command {
 
     }
 
-    @Override
     public void execute() {
         double currentElevatorPos = elevator.getElevatorPos();
-        double currentArmPos = arm.getAngleWithinRotationDegrees();
         double targetArmPos = targetState.targetArmAngle;
 
         boolean startAboveThreshold = currentElevatorPos >= threshold;
         boolean targetAboveThreshold = targetElevatorPos >= threshold;
-        boolean armAtSafeAngle = Math.abs(currentArmPos - SAFE_ARM_ANGLE) < 1.0;
         // --- CASE 1: Inherently safe (both above threshold) ---
         if (startAboveThreshold && targetAboveThreshold) {
             if (!elevatorCommanded) {
@@ -176,12 +171,10 @@ public class SetMainStateCommand extends Command {
 
     }
 
-    @Override
     public boolean isFinished() {
         return elevator.atPosition(targetElevatorPos) && arm.atPosition(targetArmPos);
     }
 
-    @Override
     public void end(boolean interrupted) {
         if (!interrupted) {
             stateManager.confirmStateReached();

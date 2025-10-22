@@ -17,8 +17,11 @@ public class MainStateMachine extends SubsystemBase {
     // Enum that defines all possible robot states
     public enum RobotState {
         STARTING(0, 90.0, ArmDirections.NEAREST, 0),
-        STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        PLUCK(0, 91.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
+        CORAL_STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        BALL_STOW(0, 270, ArmDirections.CCW, endEffectorConstants.IDLE_WITH_BALL),
+        BALL_LOW_INTAKE(0, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
+        BALL_HIGH_INTAKE(10, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
+        PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
         MANUAL_PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
         // L1
         L1(8, 139.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
@@ -31,7 +34,7 @@ public class MainStateMachine extends SubsystemBase {
         L3_SCORE(1, 194, ArmDirections.NEAREST, -0.1),
         // L4
         L4(26, 214.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        L4_SCORE(26, 191.0, ArmDirections.NEAREST, -0.15);
+        L4_SCORE(26, 191.0, ArmDirections.NEAREST, -0.175);
 
         // Each state stores its own parameters
         public final double targetElevatorHeight;
@@ -68,7 +71,7 @@ public class MainStateMachine extends SubsystemBase {
         }
 
     }
-
+    
     // References to your subsystems
     private final ElevatorSubsystem elevator;
     private final ArmSubsystem arm;
@@ -119,19 +122,36 @@ public class MainStateMachine extends SubsystemBase {
 
     public void periodic() {
         // On first enable, stow robot
-        if (currentState == RobotState.STARTING && targetState != RobotState.STOW) {
-            new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.STOW).schedule();
+        if (currentState == RobotState.STARTING && targetState != RobotState.CORAL_STOW) {
+            new SetMainStateCommand(this, elevator, arm, endeffector,
+                    RobotState.CORAL_STOW).schedule();
         }
+
+        // if (currentState == RobotState.CORAL_STOW && targetState != RobotState.PLUCK && indexer.hasCoral() && !endeffector.hasCoral()) {
+        //     SetMainStateCommand cmd = new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.PLUCK);
+        //     if (!cmd.isScheduled())
+        //         cmd.schedule();
+        // }
+
+        // if ((currentState == RobotState.PLUCK
+        //         || targetState == RobotState.PLUCK) && targetState != RobotState.CORAL_STOW && endeffector.hasCoral()) {
+        //     SetMainStateCommand cmd = new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW);
+        //     if (!cmd.isScheduled())
+        //         cmd.schedule();
+        // }
+
         // Check for coral in order to pluck
-        if ((currentState == RobotState.STOW) && indexer.hasCoral() && !endeffector.hasCoral()
-                && targetState != RobotState.PLUCK) {
-            new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.PLUCK).schedule();
-        }
+        // if ((currentState == RobotState.CORAL_STOW) && indexer.hasCoral() &&
+        // !endeffector.hasCoral()
+        // && targetState != RobotState.PLUCK) {
+        // new SetMainStateCommand(this, elevator, arm, endeffector,
+        // RobotState.PLUCK).schedule();
+        // }
         // Check for endeffector coral after pluck
-        if (((currentState == RobotState.PLUCK)|| targetState == RobotState.PLUCK) && endeffector.hasCoral()
-                && targetState != RobotState.STOW) {
-            new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.STOW).schedule();
-        }
+        // if (((currentState == RobotState.PLUCK) || targetState == RobotState.PLUCK) && endeffector.hasCoral()
+        //         && targetState != RobotState.CORAL_STOW) {
+        //     new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
+        // }
         currentStatePub.set(currentState.toString());
         targetStatePub.set(targetState.toString());
 
@@ -147,7 +167,7 @@ public class MainStateMachine extends SubsystemBase {
 
     public void setEject(boolean eject) {
         if (eject) {
-            endeffector.setPower(-0.05);
+            endeffector.setPower(-0.2);
         } else {
             endeffector.setPower(targetState.endEffectorPower);
         }
