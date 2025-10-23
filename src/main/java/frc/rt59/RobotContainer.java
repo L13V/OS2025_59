@@ -63,7 +63,7 @@ public class RobotContainer {
     private final FloorIntakeSubsystem m_floorintake = new FloorIntakeSubsystem();
     private final IndexerSubsystem m_indexer = new IndexerSubsystem();
     private final EndEffectorSubsystem m_endeffector = new EndEffectorSubsystem();
-    private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector);
+    private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector,driverXbox);
     private final IntakeStateMachine m_intakestatemanager = new IntakeStateMachine(m_floorintake, m_indexer,
             m_endeffector);
 

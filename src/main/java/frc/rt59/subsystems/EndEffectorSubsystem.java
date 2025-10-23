@@ -10,7 +10,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.Constants.endEffectorConstants;
 
@@ -28,7 +27,6 @@ public class EndEffectorSubsystem extends SubsystemBase {
     final LoggedNetworkBoolean hasCoral = new LoggedNetworkBoolean("End Effector/ Has Coral");
 
     private final Orchestra orchestra = new Orchestra("espresso.chrp");
-
 
     public EndEffectorSubsystem() {
 

@@ -113,14 +113,14 @@ public final class Constants {
         public static final int FLOOR_INTAKE_PIVOT_CURRENT_LIMIT = 80;
         public static final boolean FLOOR_INTAKE_PIVOT_INVERTED = true;
         public static final double FLOOR_INTAKE_PIVOT_TOLLERANCE = 15; // degree
-        public static final double PIVOT_FW_LIMIT = 135.0; // TODO: FIX
-        public static final double PIVOT_REVERSE_LIMIT = 20.0; // TODO: FIX
+        public static final double PIVOT_FW_LIMIT = 135.0;
+        public static final double PIVOT_REVERSE_LIMIT = 20.0;
 
-        public static final double FLOOR_INTAKE_PIVOT_P = 0.007400000002235174; // TODO: FIX
-        // public static final double FLOOR_INTAKE_PIVOT_I = 0.000004999999873689376; // TODO: FIX
-        public static final double FLOOR_INTAKE_PIVOT_I = 0.0000015999999873689376; // TODO: FIX
-        public static final double FLOOR_INTAKE_PIVOT_D = 0; // TODO: FIX
-        public static final double FLOOR_INTAKE_PIVOT_F = 0; // TODO: FIX
+        public static final double FLOOR_INTAKE_PIVOT_P = 0.007400000002235174;
+        // public static final double FLOOR_INTAKE_PIVOT_I = 0.000004999999873689376;
+        public static final double FLOOR_INTAKE_PIVOT_I = 0.0000015999999873689376;
+        public static final double FLOOR_INTAKE_PIVOT_D = 0;
+        public static final double FLOOR_INTAKE_PIVOT_F = 0;
 
         public static final int FLOOR_INTAKE_WHEELS_CAN_ID = 58;
         public static final int FLOOR_INTAKE_WHEELS_CURRENT_LIMIT = 80;

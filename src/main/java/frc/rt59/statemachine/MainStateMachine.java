@@ -1,12 +1,12 @@
 // StateManager.java
 package frc.rt59.statemachine;
 
-import java.sql.Driver;
-
 import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.rt59.commands.SetMainStateCommand;
 import frc.rt59.subsystems.ArmSubsystem;
 import frc.rt59.subsystems.ElevatorSubsystem;
@@ -45,7 +45,6 @@ public class MainStateMachine extends SubsystemBase {
         public final double targetArmAngle;
         public final ArmDirections armDirection;
         public final double endEffectorPower;
-        
 
         // Constructor to set values for each state
         RobotState(double elevatorHeight, double armAngle, ArmDirections armDirection, double endEffectorPower) {
@@ -82,6 +81,7 @@ public class MainStateMachine extends SubsystemBase {
     private final ArmSubsystem arm;
     private final IndexerSubsystem indexer;
     private final EndEffectorSubsystem endeffector;
+    private final CommandXboxController driverxbox;
 
     // Track the current and target states
     private RobotState currentState = RobotState.STARTING;
@@ -92,11 +92,12 @@ public class MainStateMachine extends SubsystemBase {
 
     // Constructor takes subsystem references (for convenience)
     public MainStateMachine(ElevatorSubsystem elevator, ArmSubsystem arm, IndexerSubsystem indexer,
-            EndEffectorSubsystem endeffector) {
+            EndEffectorSubsystem endeffector, CommandXboxController driverxbox) {
         this.elevator = elevator;
         this.arm = arm;
         this.indexer = indexer;
         this.endeffector = endeffector;
+        this.driverxbox = driverxbox;
     }
 
     // Accessors for subsystems
@@ -142,6 +143,11 @@ public class MainStateMachine extends SubsystemBase {
                 new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
             }
         }
+
+        if (getCurrentState() == RobotState.PLUCK && endeffector.hasCoral()) {
+            driverxbox.setRumble(RumbleType.kBothRumble, 0.5);
+        }
+
         currentStatePub.set(currentState.toString());
         targetStatePub.set(targetState.toString());
 

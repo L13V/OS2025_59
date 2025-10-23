@@ -4,7 +4,6 @@
 
 package frc.rt59.statemachine;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ArmSubsystem;

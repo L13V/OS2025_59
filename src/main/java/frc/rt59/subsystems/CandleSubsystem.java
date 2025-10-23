@@ -4,10 +4,7 @@ import com.ctre.phoenix6.controls.RainbowAnimation;
 
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.ColorFlowAnimation;
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.SingleFadeAnimation;
-import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.AnimationDirectionValue;
 import com.ctre.phoenix6.signals.LossOfSignalBehaviorValue;

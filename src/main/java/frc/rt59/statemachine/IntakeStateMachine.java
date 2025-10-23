@@ -10,7 +10,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
 import frc.rt59.Constants.floorIntakeConstants;
 import frc.rt59.commands.SetIntakeStateCommand;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.subsystems.FloorIntakeSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
