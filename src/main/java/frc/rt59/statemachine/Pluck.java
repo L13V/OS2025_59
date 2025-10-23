@@ -37,14 +37,12 @@ public class Pluck extends SubsystemBase {
         if (state.getCurrentState() == RobotState.CORAL_STOW
                 && state.getTargetState() != RobotState.PLUCK
                 && indexer.hasCoral() && !endeffector.hasCoral()) {
-            DriverStation.reportWarning("Hey pluck", false);
             new SetMainStateCommand(state, elevator, arm, endeffector, RobotState.PLUCK).schedule();
         }
 
         // Only return to stow if we're currently in PLUCK or the target is PLUCK
         if ((state.getCurrentState() == RobotState.PLUCK || state.getTargetState() == RobotState.PLUCK)
                 && endeffector.hasCoral() && state.getTargetState() != RobotState.CORAL_STOW) {
-            DriverStation.reportWarning("Hey Stow", false);
 
             new SetMainStateCommand(state, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
         }

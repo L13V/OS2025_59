@@ -4,26 +4,29 @@
 
 package frc.rt59;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.littletonrobotics.junction.LoggedRobot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.rt59.commands.SetIntakeStateCommand;
-import frc.rt59.commands.SetMainStateCommand;
-import frc.rt59.statemachine.IntakeStateMachine;
-import frc.rt59.statemachine.MainStateMachine;
-import frc.rt59.statemachine.Pluck;
-import frc.rt59.statemachine.IntakeStateMachine.IntakeState;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -40,6 +43,7 @@ public class Robot extends LoggedRobot {
     private RobotContainer m_robotContainer;
 
     private Timer disabledTimer;
+    private String autoName, newAutoName;
 
     public Robot() {
         instance = this;
@@ -119,6 +123,31 @@ public class Robot extends LoggedRobot {
             disabledTimer.stop();
             disabledTimer.reset();
         }
+
+        newAutoName = m_robotContainer.getAutonomousCommand().getName();
+        if (autoName != newAutoName) {
+            autoName = newAutoName;
+            if (AutoBuilder.getAllAutoNames().contains(autoName)) {
+                System.out.println("Displaying " + autoName);
+                try {
+                    List<PathPlannerPath> pathPlannerPaths = PathPlannerAuto.getPathGroupFromAutoFile(autoName);
+                    List<Pose2d> poses = new ArrayList<>();
+                    for (PathPlannerPath path : pathPlannerPaths) {
+                        poses.addAll(
+                                path.getAllPathPoints().stream()
+                                        .map(
+                                                point -> new Pose2d(
+                                                        point.position.getX(), point.position.getY(), new Rotation2d()))
+                                        .collect(Collectors.toList()));
+                    }
+                    m_robotContainer.getField().getObject("path").setPoses(poses);
+
+                } catch (IOException | org.json.simple.parser.ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 
     /**
@@ -141,6 +170,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void autonomousPeriodic() {
+
     }
 
     @Override

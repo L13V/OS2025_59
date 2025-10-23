@@ -111,6 +111,12 @@ public class SetMainStateCommand extends Command {
     }
 
     public void execute() {
+        // Checks for target discrepancies
+        if (stateManager.getTargetState() != targetState) {
+            this.cancel(); // ends the command gracefully
+            return;
+        }
+
         double currentElevatorPos = elevator.getElevatorPos();
         double targetArmPos = targetState.targetArmAngle;
 
@@ -178,6 +184,9 @@ public class SetMainStateCommand extends Command {
     public void end(boolean interrupted) {
         if (!interrupted) {
             stateManager.confirmStateReached();
+        }
+        if (interrupted) {
+            return;
         }
     }
 }

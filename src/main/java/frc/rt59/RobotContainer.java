@@ -6,6 +6,9 @@ package frc.rt59;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -27,9 +30,11 @@ import frc.rt59.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import frc.rt59.statemachine.Pluck;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.reduxrobotics.sensors.canandcolor.DigoutChannel.Index;
 
+import swervelib.SwerveDrive;
 import swervelib.SwerveInputStream;
 
 /**
@@ -42,8 +47,6 @@ import swervelib.SwerveInputStream;
  */
 @SuppressWarnings("unused")
 public class RobotContainer {
-
-    boolean startupScheduled = false;
     /*
      * Controllers
      */
@@ -69,9 +72,6 @@ public class RobotContainer {
 
     private final Pluck m_pluck = new Pluck(m_statemanager, m_elevator, m_arm, m_indexer, m_endeffector);
 
-    // private final SetMainStateCommand m_statemachine = new
-    // SetMainStateCommand(m_statemanager, m_elevator, m_arm,RobotState.STOW);
-
     /**
      * Drive Code
      */
@@ -83,54 +83,71 @@ public class RobotContainer {
             .scaleTranslation(0.8)
             .scaleRotation(-1)
             .allianceRelativeControl(true);
+    SendableChooser<Command> autoChooser;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        // new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
-        // RobotState.CORAL_STOW).schedule();
-        // new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer,
-        // IntakeState.STOW).schedule();
-        // Configure bindings
-
+        // Binds
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
+
         /*
          * PathPlanner Commands
          */
         // L1
         NamedCommands.registerCommand("L1",
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1));
-        NamedCommands.registerCommand("L1_Score",
-                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1_SCORE));
         // L2
         NamedCommands.registerCommand("L2",
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2));
-        NamedCommands.registerCommand("L2_Score",
-                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2_SCORE));
         // L3
         NamedCommands.registerCommand("L3",
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3));
-        NamedCommands.registerCommand("L3_Score",
-                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3_SCORE));
         // L4
         NamedCommands.registerCommand("L4",
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
+
+        // Scoring
+        NamedCommands.registerCommand("L1_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L1_SCORE));
+        NamedCommands.registerCommand("L2_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L2_SCORE));
+        NamedCommands.registerCommand("L3_Score",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L3_SCORE));
         NamedCommands.registerCommand("L4_Score",
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4_SCORE));
+
         // Stow
-        NamedCommands.registerCommand("Stow_Robot",
-                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.CORAL_STOW));
-        // Floor Intake
-        NamedCommands.registerCommand("Floor_Intake",
+        NamedCommands.registerCommand("Stow",
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.AUTO_CORAL_STOW));
+
+        // Pluck/ Coral Status
+        NamedCommands.registerCommand("Enable_Pluck",
+                Commands.waitUntil(m_indexer::hasCoral)
+                        .andThen(
+                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+                                        RobotState.MANUAL_PLUCK)
+                                        .onlyWhile(() -> !m_endeffector.hasCoral()))
+                        .andThen(
+                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+                                        RobotState.AUTO_CORAL_STOW)));
+
+        NamedCommands.registerCommand("Wait_For_Coral", Commands.waitUntil(() -> m_endeffector.hasCoral()));
+        // Intaking
+
+        NamedCommands.registerCommand("Intake_Down",
                 new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
-        NamedCommands.registerCommand("Stow_Intake",
+        NamedCommands.registerCommand("Intake_Stow",
                 new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
 
-        // Wait For Coral
-        NamedCommands.registerCommand("Wait_For_Coral",
-                Commands.waitUntil(m_endeffector::hasCoral).withName("Wait_For_Coral"));
+        // Auto Chooser
+        autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(
+                (stream) -> Constants.isCompetition
+                        ? stream.filter(auto -> auto.getName().startsWith("Comp"))
+                        : stream);
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     /**
@@ -210,7 +227,13 @@ public class RobotContainer {
      * Autonomous
      */
     public Command getAutonomousCommand() {
-        return drivebase.getAutonomousCommand("W-L4-A4");
+        return autoChooser.getSelected();
+        // return drivebase.getAutonomousCommand("W-L4-A4-B4");
+
+    }
+
+    public Field2d getField() {
+        return drivebase.getField();
     }
 
     public void setMotorBrake(boolean brake) {

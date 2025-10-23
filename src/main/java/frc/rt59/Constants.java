@@ -15,6 +15,8 @@ public final class Constants {
     public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
     public static final double MAX_SPEED = Units.feetToMeters(14.5);
 
+    public static final boolean isCompetition = false;
+
     public static final class DrivebaseConstants {
         // Hold time on motor brakes when disabled
         public static final double WHEEL_LOCK_TIME = 10; // seconds
@@ -81,7 +83,7 @@ public final class Constants {
         public static final double INDEXER_CORAL_THRESHOLD = 0.07;
 
         public static final boolean INDEXER_BRAKE = false;
-        public static final int INDEXER_CURRENT_LIMIT = 600;
+        public static final int INDEXER_CURRENT_LIMIT = 1000;
 
         public static final double INDEXER_P = 0.000115;
         public static final double INDEXER_I = 0.000001;

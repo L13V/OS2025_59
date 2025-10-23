@@ -3,42 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.918852220327972,
-        "y": 5.909970034701882
+        "x": 1.0130035162102808,
+        "y": 4.0703239284984285
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3894544632761359,
-        "y": 5.501362115407838
+        "x": 2.013003516210281,
+        "y": 4.0703239284984285
       },
       "isLocked": false,
-      "linkedName": "WB"
+      "linkedName": "MB"
     },
     {
       "anchor": {
-        "x": 2.9523807947847764,
-        "y": 4.189016129362713
+        "x": 2.952,
+        "y": 3.859
       },
       "prevControl": {
-        "x": 2.241604727306414,
-        "y": 4.752087546658597
+        "x": 1.952,
+        "y": 3.859
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "A4"
+      "linkedName": "B4"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.5649717514124287,
+      "minWaypointRelativePos": 0.39808778791829247,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 5.0,
+        "maxVelocity": 51.0,
         "maxAcceleration": 1.0,
-        "maxAngularVelocity": 90.0,
-        "maxAngularAcceleration": 90.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
       }
@@ -48,8 +48,8 @@
   "eventMarkers": [
     {
       "name": "Wait_For_Coral",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": 0.584963059539331,
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 0.77258805513017,
       "command": {
         "type": "sequential",
         "data": {
@@ -74,8 +74,8 @@
   "globalConstraints": {
     "maxVelocity": 5.0,
     "maxAcceleration": 5.0,
-    "maxAngularVelocity": 90.0,
-    "maxAngularAcceleration": 90.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },

@@ -1,8 +1,11 @@
 // StateManager.java
 package frc.rt59.statemachine;
 
+import java.sql.Driver;
+
 import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.commands.SetMainStateCommand;
 import frc.rt59.subsystems.ArmSubsystem;
@@ -18,6 +21,7 @@ public class MainStateMachine extends SubsystemBase {
     public enum RobotState {
         STARTING(0, 90.0, ArmDirections.NEAREST, 0),
         CORAL_STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
+        AUTO_CORAL_STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
         BALL_STOW(0, 270, ArmDirections.CCW, endEffectorConstants.IDLE_WITH_BALL),
         BALL_LOW_INTAKE(0, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
         BALL_HIGH_INTAKE(10, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
@@ -41,6 +45,7 @@ public class MainStateMachine extends SubsystemBase {
         public final double targetArmAngle;
         public final ArmDirections armDirection;
         public final double endEffectorPower;
+        
 
         // Constructor to set values for each state
         RobotState(double elevatorHeight, double armAngle, ArmDirections armDirection, double endEffectorPower) {
@@ -71,7 +76,7 @@ public class MainStateMachine extends SubsystemBase {
         }
 
     }
-    
+
     // References to your subsystems
     private final ElevatorSubsystem elevator;
     private final ArmSubsystem arm;
@@ -122,36 +127,21 @@ public class MainStateMachine extends SubsystemBase {
 
     public void periodic() {
         // On first enable, stow robot
-        if (currentState == RobotState.STARTING && targetState != RobotState.CORAL_STOW) {
-            new SetMainStateCommand(this, elevator, arm, endeffector,
-                    RobotState.CORAL_STOW).schedule();
+        if (getTargetState() == RobotState.STARTING) {
+            if (DriverStation.isTeleopEnabled()) {
+                new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
+            }
+
+            if (DriverStation.isAutonomousEnabled()) {
+                new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.AUTO_CORAL_STOW).schedule();
+            }
         }
 
-        // if (currentState == RobotState.CORAL_STOW && targetState != RobotState.PLUCK && indexer.hasCoral() && !endeffector.hasCoral()) {
-        //     SetMainStateCommand cmd = new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.PLUCK);
-        //     if (!cmd.isScheduled())
-        //         cmd.schedule();
-        // }
-
-        // if ((currentState == RobotState.PLUCK
-        //         || targetState == RobotState.PLUCK) && targetState != RobotState.CORAL_STOW && endeffector.hasCoral()) {
-        //     SetMainStateCommand cmd = new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW);
-        //     if (!cmd.isScheduled())
-        //         cmd.schedule();
-        // }
-
-        // Check for coral in order to pluck
-        // if ((currentState == RobotState.CORAL_STOW) && indexer.hasCoral() &&
-        // !endeffector.hasCoral()
-        // && targetState != RobotState.PLUCK) {
-        // new SetMainStateCommand(this, elevator, arm, endeffector,
-        // RobotState.PLUCK).schedule();
-        // }
-        // Check for endeffector coral after pluck
-        // if (((currentState == RobotState.PLUCK) || targetState == RobotState.PLUCK) && endeffector.hasCoral()
-        //         && targetState != RobotState.CORAL_STOW) {
-        //     new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
-        // }
+        if (getTargetState() == RobotState.AUTO_CORAL_STOW) {
+            if (DriverStation.isTeleopEnabled()) {
+                new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
+            }
+        }
         currentStatePub.set(currentState.toString());
         targetStatePub.set(targetState.toString());
 

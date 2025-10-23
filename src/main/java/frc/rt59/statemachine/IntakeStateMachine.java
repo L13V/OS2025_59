@@ -35,7 +35,7 @@ public class IntakeStateMachine extends SubsystemBase {
     public enum IntakeState {
         STARTING(130, 0.0, 0.0, 0.0, 0.0),
         STOW(120, 0.0, 0.0, 0.0, 0.0),
-        DOWN(23, 0.7, 0.0, -1, 0.0),
+        DOWN(23, 1, 0.0, -1, 0.0),
         DOWN_DEAD(23, 0, 0, 0, 0),
         DOWN_OUTTAKE(23, -0.5, -0.5, 0.3, 0.3);
 
