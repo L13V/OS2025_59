@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
 import frc.rt59.Constants.floorIntakeConstants;
 import frc.rt59.commands.SetIntakeStateCommand;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.subsystems.FloorIntakeSubsystem;
 import frc.rt59.subsystems.IndexerSubsystem;
@@ -101,7 +102,7 @@ public class IntakeStateMachine extends SubsystemBase {
     }
 
     public void periodic() {
-        if (currentState == IntakeState.STARTING && targetState != IntakeState.STOW) {
+        if (currentState == IntakeState.STARTING && targetState != IntakeState.STOW && !DriverStation.isAutonomous()) {
             new SetIntakeStateCommand(this, floorintake, indexer, IntakeState.STOW).schedule();
         }
 

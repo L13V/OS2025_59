@@ -63,7 +63,8 @@ public class RobotContainer {
     private final FloorIntakeSubsystem m_floorintake = new FloorIntakeSubsystem();
     private final IndexerSubsystem m_indexer = new IndexerSubsystem();
     private final EndEffectorSubsystem m_endeffector = new EndEffectorSubsystem();
-    private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector,driverXbox);
+    private final MainStateMachine m_statemanager = new MainStateMachine(m_elevator, m_arm, m_indexer, m_endeffector,
+            driverXbox);
     private final IntakeStateMachine m_intakestatemanager = new IntakeStateMachine(m_floorintake, m_indexer,
             m_endeffector);
 
@@ -76,12 +77,11 @@ public class RobotContainer {
      * Drive Code
      */
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-            () -> driverXbox.getLeftY() * -1,
-            () -> driverXbox.getLeftX() * -1)
-            .withControllerRotationAxis(driverXbox::getRightX)
+            () -> driverXbox.getLeftY() * -1 * drivebase.drivemultiplier,
+            () -> driverXbox.getLeftX() * -1 * drivebase.drivemultiplier)
+            .withControllerRotationAxis(() -> driverXbox.getRightX() * -1 * drivebase.drivemultiplier)
             .deadband(DriverControlConstants.DEADBAND)
             .scaleTranslation(0.8)
-            .scaleRotation(-1)
             .allianceRelativeControl(true);
     SendableChooser<Command> autoChooser;
 
@@ -122,6 +122,8 @@ public class RobotContainer {
         // Stow
         NamedCommands.registerCommand("Stow",
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.AUTO_CORAL_STOW));
+        NamedCommands.registerCommand("Intake_Stow",
+                new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
 
         // Pluck/ Coral Status
         NamedCommands.registerCommand("Enable_Pluck",
@@ -139,8 +141,6 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Intake_Down",
                 new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.DOWN));
-        NamedCommands.registerCommand("Intake_Stow",
-                new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
 
         // Auto Chooser
         autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(
@@ -166,6 +166,7 @@ public class RobotContainer {
          */
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
         driverXbox.back().whileTrue(drivebase.centerModulesCommand());
+        driverXbox.leftTrigger().onTrue(drivebase.goSlow()).onFalse(drivebase.goFast());
         /*
          * Floor Intake
          */
@@ -182,6 +183,12 @@ public class RobotContainer {
                 .onTrue(new SetIntakeStateCommand(m_intakestatemanager, m_floorintake, m_indexer, IntakeState.STOW));
         // Scoring
         driverXbox.rightTrigger().onTrue(new InstantCommand(() -> m_statemanager.setToScoreState()));
+
+        driverXbox.povLeft().onTrue(
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.BALL_LOW_INTAKE));
+        driverXbox.povRight().onTrue(
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.BALL_STOW));
+
         // driverXbox.rightTrigger().onFalse(new InstantCommand(() ->
         // m_statemanager.setToUnscoreState()));
         operatorXbox.b().onTrue(new InstantCommand(() -> m_statemanager.setToScoreState()));
@@ -228,8 +235,6 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
-        // return drivebase.getAutonomousCommand("W-L4-A4-B4");
-
     }
 
     public Field2d getField() {

@@ -132,10 +132,6 @@ public class MainStateMachine extends SubsystemBase {
             if (DriverStation.isTeleopEnabled()) {
                 new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
             }
-
-            if (DriverStation.isAutonomousEnabled()) {
-                new SetMainStateCommand(this, elevator, arm, endeffector, RobotState.AUTO_CORAL_STOW).schedule();
-            }
         }
 
         if (getTargetState() == RobotState.AUTO_CORAL_STOW) {
@@ -144,8 +140,11 @@ public class MainStateMachine extends SubsystemBase {
             }
         }
 
-        if (getCurrentState() == RobotState.PLUCK && endeffector.hasCoral()) {
+        if (getTargetState() == RobotState.PLUCK && endeffector.hasCoral() && DriverStation.isEnabled()) {
             driverxbox.setRumble(RumbleType.kBothRumble, 0.5);
+        }
+        if (getTargetState() != RobotState.PLUCK) {
+            driverxbox.setRumble(RumbleType.kBothRumble, 0);
         }
 
         currentStatePub.set(currentState.toString());

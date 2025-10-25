@@ -1,0 +1,85 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Stow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake_Stow"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W-L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4_Score"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4-WB"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Enable_Pluck"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "WB-A4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4_Score"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A4-MB"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Enable_Pluck"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -15,11 +15,13 @@ public final class Constants {
     public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
     public static final double MAX_SPEED = Units.feetToMeters(14.5);
 
-    public static final boolean isCompetition = false;
+    public static final boolean isCompetition = true;
 
     public static final class DrivebaseConstants {
         // Hold time on motor brakes when disabled
         public static final double WHEEL_LOCK_TIME = 10; // seconds
+        public static final double slow_multiplier = 0.33;
+        public static final double normal_multiplier = 0.8;
     }
 
     public static class DriverControlConstants {
@@ -101,9 +103,9 @@ public final class Constants {
         // Powers
         public static final double PLUCK_POWER = 0.45;
         public static final double IDLE_WITH_CORAL = 0.05;
-        public static final double IDLE_WITH_BALL = 0.1;
+        public static final double IDLE_WITH_BALL = 0.6;
 
-        public static final double INTAKE_BALL = 0.2;
+        public static final double INTAKE_BALL = 0.27;
 
     }
 
@@ -117,7 +119,6 @@ public final class Constants {
         public static final double PIVOT_REVERSE_LIMIT = 20.0;
 
         public static final double FLOOR_INTAKE_PIVOT_P = 0.007400000002235174;
-        // public static final double FLOOR_INTAKE_PIVOT_I = 0.000004999999873689376;
         public static final double FLOOR_INTAKE_PIVOT_I = 0.0000015999999873689376;
         public static final double FLOOR_INTAKE_PIVOT_D = 0;
         public static final double FLOOR_INTAKE_PIVOT_F = 0;
@@ -128,8 +129,6 @@ public final class Constants {
 
         public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MIN = 19; // degree
         public static final double FLOOR_INTAKE_PIVOT_DEADZONE_MAX = 30; // degree
-
-
 
     }
 }

@@ -63,7 +63,7 @@ public class FloorIntakeSubsystem extends SubsystemBase {
                 floorIntakeConstants.FLOOR_INTAKE_PIVOT_D);
         floorIntakePivotConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         floorIntakePivotConfig.absoluteEncoder.positionConversionFactor(180);
-        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.1142067);
+        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.4546799957752228);
         floorIntakePivotMotor.configure(floorIntakePivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         /*

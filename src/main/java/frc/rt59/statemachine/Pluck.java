@@ -4,6 +4,8 @@
 
 package frc.rt59.statemachine;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.internal.DriverStationModeThread;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.rt59.statemachine.MainStateMachine.RobotState;
 import frc.rt59.subsystems.ArmSubsystem;
@@ -31,19 +33,23 @@ public class Pluck extends SubsystemBase {
     }
 
     public void periodic() {
-        // Only trigger pluck if current state is already CORAL_STOW and target is also
-        // CORAL_STOW
-        if (state.getCurrentState() == RobotState.CORAL_STOW
-                && state.getTargetState() != RobotState.PLUCK
-                && indexer.hasCoral() && !endeffector.hasCoral()) {
-            new SetMainStateCommand(state, elevator, arm, endeffector, RobotState.PLUCK).schedule();
+
+        if (!DriverStation.isAutonomous()) {
+            // Only trigger pluck if current state is already CORAL_STOW and target is also
+            // CORAL_STOW
+            if (state.getCurrentState() == RobotState.CORAL_STOW
+                    && state.getTargetState() != RobotState.PLUCK
+                    && indexer.hasCoral() && !endeffector.hasCoral()) {
+                new SetMainStateCommand(state, elevator, arm, endeffector, RobotState.PLUCK).schedule();
+            }
+
+            // Only return to stow if we're currently in PLUCK or the target is PLUCK
+            if ((state.getCurrentState() == RobotState.PLUCK || state.getTargetState() == RobotState.PLUCK)
+                    && endeffector.hasCoral() && state.getTargetState() != RobotState.CORAL_STOW) {
+
+                new SetMainStateCommand(state, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
+            }
         }
 
-        // Only return to stow if we're currently in PLUCK or the target is PLUCK
-        if ((state.getCurrentState() == RobotState.PLUCK || state.getTargetState() == RobotState.PLUCK)
-                && endeffector.hasCoral() && state.getTargetState() != RobotState.CORAL_STOW) {
-
-            new SetMainStateCommand(state, elevator, arm, endeffector, RobotState.CORAL_STOW).schedule();
-        }
     }
 }

@@ -45,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.rt59.Constants;
+import frc.rt59.Constants.DrivebaseConstants;
 import frc.rt59.subsystems.swervedrive.Vision.Cameras;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -70,6 +71,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * PhotonVision class to keep an accurate odometry.
      */
     private Vision vision;
+    public double drivemultiplier = DrivebaseConstants.normal_multiplier;
 
     /**
      * Initialize {@link SwerveDrive} with the directory provided.
@@ -150,7 +152,7 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.updateOdometry();
             vision.updatePoseEstimation(swerveDrive);
         }
-        
+
     }
 
     @Override
@@ -195,8 +197,8 @@ public class SwerveSubsystem extends SubsystemBase {
                             // new PIDConstants(2.4,0, 0),
 
                             // Translation PID constants
-                            new PIDConstants(5,0.1, 0)
-                            // new PIDConstants(5,0.13,0.1)
+                            new PIDConstants(5, 0.1, 0)
+                    // new PIDConstants(5,0.13,0.1)
 
                     // Rotation PID constants
                     ),
@@ -605,6 +607,22 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     public void setMotorBrake(boolean brake) {
         swerveDrive.setMotorIdleMode(brake);
+    }
+
+    public void setDriveMultiplier(boolean slow) {
+        if (slow == true) {
+            drivemultiplier = DrivebaseConstants.slow_multiplier;
+        } else {
+            drivemultiplier = DrivebaseConstants.normal_multiplier;
+        }
+    }
+
+    public Command goSlow() {
+        return this.runOnce(() -> setDriveMultiplier(true));
+    }
+
+    public Command goFast() {
+        return this.runOnce(() -> setDriveMultiplier(false));
     }
 
     /**
