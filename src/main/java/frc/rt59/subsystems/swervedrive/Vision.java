@@ -80,10 +80,10 @@ public class Vision {
      * Constructor for the Vision class.
      *
      * @param currentPose
-     *            Current pose supplier, should reference
-     *            {@link SwerveDrive#getPose()}
+     *                    Current pose supplier, should reference
+     *                    {@link SwerveDrive#getPose()}
      * @param field
-     *            Current field, should be {@link SwerveDrive#field}
+     *                    Current field, should be {@link SwerveDrive#field}
      */
     public Vision(Supplier<Pose2d> currentPose, Field2d field) {
         this.currentPose = currentPose;
@@ -105,11 +105,12 @@ public class Vision {
      * Calculates a target pose relative to an AprilTag on the field.
      *
      * @param aprilTag
-     *            The ID of the AprilTag.
+     *                    The ID of the AprilTag.
      * @param robotOffset
-     *            The offset {@link Transform2d} of the robot to apply to the pose
-     *            for the robot to position
-     *            itself correctly.
+     *                    The offset {@link Transform2d} of the robot to apply to
+     *                    the pose
+     *                    for the robot to position
+     *                    itself correctly.
      * @return The target pose of the AprilTag.
      */
     public static Pose2d getAprilTagPose(int aprilTag, Transform2d robotOffset) {
@@ -127,7 +128,7 @@ public class Vision {
      * given poses.
      *
      * @param swerveDrive
-     *            {@link SwerveDrive} instance.
+     *                    {@link SwerveDrive} instance.
      */
     public void updatePoseEstimation(SwerveDrive swerveDrive) {
         if (SwerveDriveTelemetry.isSimulation && swerveDrive.getSimulationDriveTrainPose().isPresent()) {
@@ -187,7 +188,7 @@ public class Vision {
      * 10m for a short amount of time.
      *
      * @param pose
-     *            Estimated robot pose.
+     *             Estimated robot pose.
      * @return Could be empty if there isn't a good reading.
      */
     @SuppressWarnings("unused")
@@ -227,7 +228,7 @@ public class Vision {
      * Get distance of the robot from the AprilTag pose.
      *
      * @param id
-     *            AprilTag ID
+     *           AprilTag ID
      * @return Distance
      */
     public double getDistanceFromAprilTag(int id) {
@@ -239,9 +240,9 @@ public class Vision {
      * Get tracked target from a camera of AprilTagID
      *
      * @param id
-     *            AprilTag ID
+     *               AprilTag ID
      * @param camera
-     *            Camera to check.
+     *               Camera to check.
      * @return Tracked target.
      */
     public PhotonTrackedTarget getTargetFromId(int id, Cameras camera) {
@@ -315,11 +316,11 @@ public class Vision {
     /**
      * Camera Enum to select each camera
      */
-    enum Cameras {
+    public enum Cameras {
         /**
          * Left Camera
          */
-        LEFT_RAM_CANT("RT-1",
+        RT_1("RT-1",
                 new Rotation3d(0, Math.toRadians(0), Math.toRadians(0)),
                 new Translation3d(Units.inchesToMeters(10.5823),
                         Units.inchesToMeters(7.2849),
@@ -328,7 +329,7 @@ public class Vision {
         /**
          * Right Camera
          */
-        RIGHT_CANT("RT-2",
+        RT_2("RT-2",
                 new Rotation3d(0, Math.toRadians(0), Math.toRadians(0)),
                 new Translation3d(Units.inchesToMeters(10.5823),
                         Units.inchesToMeters(-7.2849),
@@ -390,17 +391,21 @@ public class Vision {
          * estimation noise on an actual robot.
          *
          * @param name
-         *            Name of the PhotonVision camera found in the PV UI.
+         *                              Name of the PhotonVision camera found in the PV
+         *                              UI.
          * @param robotToCamRotation
-         *            {@link Rotation3d} of the camera.
+         *                              {@link Rotation3d} of the camera.
          * @param robotToCamTranslation
-         *            {@link Translation3d} relative to the center of the robot.
+         *                              {@link Translation3d} relative to the center of
+         *                              the robot.
          * @param singleTagStdDevs
-         *            Single AprilTag standard deviations of estimated poses from the
-         *            camera.
+         *                              Single AprilTag standard deviations of estimated
+         *                              poses from the
+         *                              camera.
          * @param multiTagStdDevsMatrix
-         *            Multi AprilTag standard deviations of estimated poses from the
-         *            camera.
+         *                              Multi AprilTag standard deviations of estimated
+         *                              poses from the
+         *                              camera.
          */
         Cameras(String name, Rotation3d robotToCamRotation, Translation3d robotToCamTranslation,
                 Matrix<N3, N1> singleTagStdDevs, Matrix<N3, N1> multiTagStdDevsMatrix) {
@@ -442,7 +447,7 @@ public class Vision {
          * Add camera to {@link VisionSystemSim} for simulated photon vision.
          *
          * @param systemSim
-         *            {@link VisionSystemSim} to use.
+         *                  {@link VisionSystemSim} to use.
          */
         public void addToVisionSim(VisionSystemSim systemSim) {
             if (Robot.isSimulation()) {
@@ -551,9 +556,9 @@ public class Vision {
          * on number of tags, estimation strategy, and distance from the tags.
          *
          * @param estimatedPose
-         *            The estimated pose to guess standard deviations for.
+         *                      The estimated pose to guess standard deviations for.
          * @param targets
-         *            All targets in this camera frame
+         *                      All targets in this camera frame
          */
         private void updateEstimationStdDevs(
                 Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
@@ -600,9 +605,40 @@ public class Vision {
                     }
                     curStdDevs = estStdDevs;
                 }
+
             }
         }
 
+    }
+
+    public int getReefTag(Cameras camera) {
+        var resultOpt = camera.getLatestResult();
+        if (resultOpt.isEmpty()) {
+            return 0; // no result from camera
+        }
+        var result = resultOpt.get();
+        if (!result.hasTargets()) {
+            return 0; // no targets in this frame
+        }
+        int bestTarget = result.getBestTarget().getFiducialId();
+        if ((bestTarget >= 6 && bestTarget <= 11) || (bestTarget >= 17 && bestTarget <= 22)) {
+            return bestTarget;
+        } else {
+            return 0;
+        }
+    }
+    public static Cameras getCamera(Cameras camera) {
+        return camera;
+    }
+
+    public Pose2d getReefTagPose(Cameras camera) {
+        int reeftag = getReefTag(camera);
+        if (reeftag != 0) {
+            return getAprilTagPose(getReefTag(camera), new Transform2d());
+
+        } else {
+            return new Pose2d(1,1,new Rotation2d(1));
+        }
     }
 
 }

@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.rt59;
 
 import edu.wpi.first.math.geometry.Translation3d;
@@ -85,7 +81,7 @@ public final class Constants {
         public static final double INDEXER_CORAL_THRESHOLD = 0.07;
 
         public static final boolean INDEXER_BRAKE = false;
-        public static final int INDEXER_CURRENT_LIMIT = 1000;
+        public static final int INDEXER_CURRENT_LIMIT = 9999;
 
         public static final double INDEXER_P = 0.000115;
         public static final double INDEXER_I = 0.000001;
@@ -103,9 +99,11 @@ public final class Constants {
         // Powers
         public static final double PLUCK_POWER = 0.45;
         public static final double IDLE_WITH_CORAL = 0.05;
-        public static final double IDLE_WITH_BALL = 0.6;
+        public static final double IDLE_WITH_BALL = 0.05;
+        public static final double SCORE_BALL = -0.1;
 
-        public static final double INTAKE_BALL = 0.27;
+
+        public static final double INTAKE_BALL = 0.1;
 
     }
 

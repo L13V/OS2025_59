@@ -1,18 +1,17 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.rt59.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Meter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.json.simple.parser.ParseException;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -23,8 +22,11 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
@@ -32,6 +34,7 @@ import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -41,6 +44,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
@@ -72,6 +76,8 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     private Vision vision;
     public double drivemultiplier = DrivebaseConstants.normal_multiplier;
+
+    public Pose2d tagpose;
 
     /**
      * Initialize {@link SwerveDrive} with the directory provided.
@@ -152,6 +158,39 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.updateOdometry();
             vision.updatePoseEstimation(swerveDrive);
         }
+
+        // Start all this stuff
+        // Optional<PhotonPipelineResult> latestresult =
+        // Vision.getCamera(Cameras.RT_1).getLatestResult();
+        // if (latestresult.isPresent()) {
+        // if (latestresult.get().hasTargets()) {
+        // int bestTarget = latestresult.get().getBestTarget().getFiducialId();
+        // if ((bestTarget >= 6 && bestTarget <= 11) || (bestTarget >= 17 && bestTarget
+        // <= 22)) {
+        // tagpose =
+        // Vision.getAprilTagPose(latestresult.get().getBestTarget().getFiducialId(),
+        // new Transform2d());
+        // getField().getObject("TargetTag").setPose(tagpose);
+        // List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+        // getPose(),
+        // tagpose);
+        // PathPlannerPath pathPath = new PathPlannerPath(waypoints, new
+        // PathConstraints(3, 3, 240, 240),
+        // new IdealStartingState(0, getPose().getRotation()),
+        // new GoalEndState(0, tagpose.getRotation()));
+
+        // List<Pose2d> poses = new ArrayList<>();
+        // poses.addAll(
+        // pathPath.getAllPathPoints().stream()
+        // .map(
+        // point -> new Pose2d(
+        // point.position.getX(), point.position.getY(),
+        // new Rotation2d()))
+        // .collect(Collectors.toList()));
+        // getField().getObject("scorepath").setPoses(poses);
+        // }
+        // }
+        // }
 
     }
 
@@ -261,6 +300,25 @@ public class SwerveSubsystem extends SubsystemBase {
         // Create a path following command using AutoBuilder. This will also trigger
         // event markers.
         return new PathPlannerAuto(pathName);
+    }
+
+    private Command currentFollowCommand = null;
+
+    public Command followPath(PathPlannerPath path) {
+        if (path == null)
+            return null;
+        Command follow = AutoBuilder.followPath(path);
+        if (follow == null)
+            return null;
+
+        currentFollowCommand = follow;
+        // Clear the reference when the command finishes/ends
+        currentFollowCommand = currentFollowCommand.finallyDo(interrupted -> currentFollowCommand = null);
+        return currentFollowCommand;
+    }
+
+    public boolean isFollowing() {
+        return currentFollowCommand != null && currentFollowCommand.isScheduled();
     }
 
     /**

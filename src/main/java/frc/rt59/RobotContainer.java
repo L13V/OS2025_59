@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.rt59;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -14,8 +10,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.rt59.Constants.DriverControlConstants;
+import frc.rt59.commands.AlignAndScore;
 import frc.rt59.commands.SetIntakeStateCommand;
 import frc.rt59.commands.SetMainStateCommand;
+import frc.rt59.commands.swervedrive.AlignAndScoreFactory;
 import frc.rt59.statemachine.IntakeStateMachine;
 import frc.rt59.statemachine.MainStateMachine;
 import frc.rt59.statemachine.IntakeStateMachine.IntakeState;
@@ -30,6 +28,7 @@ import frc.rt59.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import frc.rt59.statemachine.Pluck;
 
+import com.ctre.phoenix.motorcontrol.can.VictorSPXConfiguration;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.reduxrobotics.sensors.canandcolor.DigoutChannel.Index;
@@ -160,6 +159,7 @@ public class RobotContainer {
          */
         Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
         drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        driverXbox.povLeft().whileTrue(AlignAndScoreFactory.autoAlign(drivebase, m_visualizer));
 
         /*
          * Standard Controls
@@ -184,10 +184,17 @@ public class RobotContainer {
         // Scoring
         driverXbox.rightTrigger().onTrue(new InstantCommand(() -> m_statemanager.setToScoreState()));
 
-        driverXbox.povLeft().onTrue(
+        /*
+         * BALL
+         */
+        operatorXbox.povDown().onTrue(
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.BALL_LOW_INTAKE));
-        driverXbox.povRight().onTrue(
+        operatorXbox.povUp().onTrue(
+                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.BALL_HIGH_INTAKE));
+        operatorXbox.back().onTrue(
                 new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.BALL_STOW));
+        // driverXbox.x().onTrue(
+        //         new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.BARGE));
 
         // driverXbox.rightTrigger().onFalse(new InstantCommand(() ->
         // m_statemanager.setToUnscoreState()));
@@ -196,6 +203,8 @@ public class RobotContainer {
         // Eject
         driverXbox.y().onTrue(new InstantCommand(() -> m_statemanager.setEject(true)));
         driverXbox.y().onFalse(new InstantCommand(() -> m_statemanager.setEject(false)));
+        driverXbox.a().onTrue(new InstantCommand(() -> m_intakestatemanager.setEject(true)));
+        driverXbox.a().onFalse(new InstantCommand(() -> m_intakestatemanager.setEject(false)));
 
         operatorXbox.a().onTrue(new InstantCommand(() -> m_statemanager.setEject(true)));
         operatorXbox.a().onFalse(new InstantCommand(() -> m_statemanager.setEject(false)));
@@ -213,18 +222,20 @@ public class RobotContainer {
         operatorXbox.rightTrigger()
                 .onTrue(new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector, RobotState.L4));
 
-        operatorXbox.back()
-                .and(() -> m_statemanager.getCurrentState() == RobotState.CORAL_STOW)
-                .onTrue(
-                        Commands.sequence(
-                                // go to MANUAL_PLUCK
-                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
-                                        RobotState.MANUAL_PLUCK),
-                                // wait 2 seconds
-                                Commands.waitSeconds(2),
-                                // then go back to STOW
-                                new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
-                                        RobotState.CORAL_STOW)));
+
+        
+        // operatorXbox.back()
+        // .and(() -> m_statemanager.getCurrentState() == RobotState.CORAL_STOW)
+        // .onTrue(
+        // Commands.sequence(
+        // // go to MANUAL_PLUCK
+        // new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+        // RobotState.MANUAL_PLUCK),
+        // // wait 2 seconds
+        // Commands.waitSeconds(2),
+        // // then go back to STOW
+        // new SetMainStateCommand(m_statemanager, m_elevator, m_arm, m_endeffector,
+        // RobotState.CORAL_STOW)));
 
         // the lion does not concern itself with comments
 

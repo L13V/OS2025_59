@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.rt59.subsystems;
 
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -63,7 +59,7 @@ public class FloorIntakeSubsystem extends SubsystemBase {
                 floorIntakeConstants.FLOOR_INTAKE_PIVOT_D);
         floorIntakePivotConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         floorIntakePivotConfig.absoluteEncoder.positionConversionFactor(180);
-        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.4546799957752228);
+        floorIntakePivotConfig.absoluteEncoder.zeroOffset(0.5786972641944885);
         floorIntakePivotMotor.configure(floorIntakePivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         /*

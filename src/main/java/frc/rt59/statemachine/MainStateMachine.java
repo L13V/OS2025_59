@@ -19,12 +19,11 @@ public class MainStateMachine extends SubsystemBase {
 
     // Enum that defines all possible robot states
     public enum RobotState {
+        // CORAL
         STARTING(0, 90.0, ArmDirections.NEAREST, 0),
         CORAL_STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
         AUTO_CORAL_STOW(5, 90.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        BALL_STOW(0, 270, ArmDirections.CCW, endEffectorConstants.IDLE_WITH_BALL),
-        BALL_LOW_INTAKE(0, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
-        BALL_HIGH_INTAKE(10, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
+
         PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
         MANUAL_PLUCK(0, 90.0, ArmDirections.NEAREST, endEffectorConstants.PLUCK_POWER),
         // L1
@@ -38,7 +37,14 @@ public class MainStateMachine extends SubsystemBase {
         L3_SCORE(1, 194, ArmDirections.NEAREST, -0.1),
         // L4
         L4(26, 214.0, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_CORAL),
-        L4_SCORE(26, 191.0, ArmDirections.NEAREST, -0.175);
+        L4_SCORE(26, 191.0, ArmDirections.NEAREST, -0.175),
+
+        // ****BALL****
+        BALL_STOW(0, 270, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_BALL),
+        BALL_LOW_INTAKE(0, 75, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
+        BALL_HIGH_INTAKE(13.6, 180, ArmDirections.NEAREST, endEffectorConstants.INTAKE_BALL),
+        BARGE(26, 244, ArmDirections.NEAREST, endEffectorConstants.IDLE_WITH_BALL),
+        BARGE_SCORE(26, 244, ArmDirections.NEAREST, endEffectorConstants.SCORE_BALL);
 
         // Each state stores its own parameters
         public final double targetElevatorHeight;
@@ -60,6 +66,7 @@ public class MainStateMachine extends SubsystemBase {
                 case L2 -> L2_SCORE;
                 case L3 -> L3_SCORE;
                 case L4 -> L4_SCORE;
+                case BARGE -> BARGE_SCORE;
                 default -> this;
             };
         }
@@ -70,6 +77,7 @@ public class MainStateMachine extends SubsystemBase {
                 case L2_SCORE -> L2;
                 case L3_SCORE -> L3;
                 case L4_SCORE -> L4;
+                case BARGE_SCORE -> BARGE;
                 default -> this;
             };
         }
@@ -79,6 +87,7 @@ public class MainStateMachine extends SubsystemBase {
     // References to your subsystems
     private final ElevatorSubsystem elevator;
     private final ArmSubsystem arm;
+    @SuppressWarnings("unused")
     private final IndexerSubsystem indexer;
     private final EndEffectorSubsystem endeffector;
     private final CommandXboxController driverxbox;

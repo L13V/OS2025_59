@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.rt59;
 
 import java.io.IOException;
@@ -132,15 +128,30 @@ public class Robot extends LoggedRobot {
                 try {
                     List<PathPlannerPath> pathPlannerPaths = PathPlannerAuto.getPathGroupFromAutoFile(autoName);
                     List<Pose2d> poses = new ArrayList<>();
-                    for (PathPlannerPath path : pathPlannerPaths) {
-                        poses.addAll(
-                                path.getAllPathPoints().stream()
-                                        .map(
-                                                point -> new Pose2d(
-                                                        point.position.getX(), point.position.getY(), new Rotation2d()))
-                                        .collect(Collectors.toList()));
+                    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+                        for (PathPlannerPath path : pathPlannerPaths) {
+                            poses.addAll(
+                                    path.getAllPathPoints().stream()
+                                            .map(
+                                                    point -> new Pose2d(
+                                                            point.position.getX(), point.position.getY(),
+                                                            new Rotation2d()))
+                                            .collect(Collectors.toList()));
+                        }
+                        m_robotContainer.getField().getObject("path").setPoses(poses);
+                    } else {
+                        for (PathPlannerPath path : pathPlannerPaths) {
+                            poses.addAll(
+                                    path.getAllPathPoints().stream()
+                                            .map(
+                                                    point -> new Pose2d(
+                                                            17.526 - point.position.getX(),
+                                                            8.05 - point.position.getY(),
+                                                            new Rotation2d()))
+                                            .collect(Collectors.toList()));
+                        }
+                        m_robotContainer.getField().getObject("path").setPoses(poses);
                     }
-                    m_robotContainer.getField().getObject("path").setPoses(poses);
 
                 } catch (IOException | org.json.simple.parser.ParseException e) {
                     e.printStackTrace();

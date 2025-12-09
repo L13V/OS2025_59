@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.rt59.statemachine;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -106,7 +102,7 @@ public class IntakeStateMachine extends SubsystemBase {
             new SetIntakeStateCommand(this, floorintake, indexer, IntakeState.STOW).schedule();
         }
 
-        if (targetState != IntakeState.DOWN_OUTTAKE && currentState != IntakeState.DOWN_OUTTAKE) {
+        if (targetState != IntakeState.DOWN_OUTTAKE && currentState != IntakeState.DOWN_OUTTAKE && targetState != IntakeState.STOW && currentState != IntakeState.STOW) {
             if (indexer.hasCoral() || endeffector.hasCoral()) {
                 indexer.setPower(targetState.cIndexerPower);
                 floorintake.setWheelPower(targetState.cRollerPower);
@@ -154,5 +150,13 @@ public class IntakeStateMachine extends SubsystemBase {
         floorintake.setPivotAngle(IntakeState.STOW.angle);
         floorintake.setWheelPower(IntakeState.STOW.nRollerPower);
         indexer.setPower(IntakeState.STOW.nIndexerPower);
+    }
+
+    public void setEject(boolean eject) {
+        if (eject) {
+            indexer.setPower(0.7);
+        } else {
+            indexer.setPower(targetState.cIndexerPower);
+        }
     }
 }
